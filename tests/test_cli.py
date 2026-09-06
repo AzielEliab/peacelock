@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 from peacelock import __version__
-from peacelock.chain import Ledger
 from peacelock.cli import main
 
 
