@@ -29,7 +29,7 @@ function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent, Authorization",
   };
 }
 
@@ -97,7 +97,7 @@ export function jsonLd() {
 }
 
 function sitemapXml() {
-  const paths = ["/", "/download", "/install.sh", "/v1/skill", "/v1/example", "/v1/health", "/openapi.json", "/mcp", "/cite.json", "/llms.txt", "/ai"];
+  const paths = ["/", "/download", "/install.sh", "/v1/skill", "/v1/example", "/v1/health", "/v1/fraggate/list", "/openapi.json", "/mcp", "/cite.json", "/llms.txt", "/ai"];
   const urls = paths.map((p) => `  <url><loc>${HOST}${p === "/" ? "/" : p}</loc></url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -174,8 +174,11 @@ Skill: ${HOST}/v1/skill
 MCP: ${HOST}/mcp
 Catalog MCP: ${CATALOG}mcp (FragGate slug peacelock)
 Cite: ${HOST}/cite.json
-Ops: POST /v1/open, POST /v1/seal, POST /v1/break, POST /v1/verify, POST /v1/upload
+Ops: POST /v1/open, POST /v1/seal, POST /v1/break, POST /v1/show, POST /v1/verify, GET /v1/health, GET /v1/skill
+FragGate proxy: GET /v1/fraggate/list, GET /v1/fraggate/describe, POST /v1/fraggate/call (via AZIEL_RUNTIME)
+Catalog LIVE_OPS: open, seal, break, show, verify, stamp, upload_envelope, health, skill
 MCP tools: peacelock_health, peacelock_skill, peacelock_open, peacelock_seal, peacelock_verify
+Doctor: Worker-local / CLI only — not a FragGate LIVE_OPS
 Identity: Aziel Eliab only
 License: Apache-2.0
 Forks: welcome and always allowed
@@ -347,7 +350,7 @@ export function renderHome(stats) {
 
     <section class="workspace" id="workspace">
       <h2><span class="kicker">Live software</span>Quiet workspace</h2>
-      <p class="lede">Use UI: real PeaceLock ops on this Worker — <code>POST /v1/open</code>, <code>/v1/seal</code>, <code>/v1/break</code>, <code>/v1/show</code>, <code>/v1/verify</code>, <code>/v1/upload</code>. The Worker does not store your ledger. This page keeps it in this browser until you export it. Upload hashes file bytes and stamps <code>timestamp</code> + <code>date_stamp</code>. No unspoken words.</p>
+      <p class="lede">Use UI: catalog labels on this Worker — Open / Seal / Break / Show / Verify / Health / Skill (<code>POST /v1/open</code>, <code>/v1/seal</code>, <code>/v1/break</code>, <code>/v1/show</code>, <code>/v1/verify</code>, <code>GET /v1/health</code>, <code>GET /v1/skill</code>, plus <code>POST /v1/upload</code>). FragGate door proxy: <code>/v1/fraggate/list</code>, <code>/describe</code>, <code>/call</code> via AZIEL_RUNTIME. The Worker does not store your ledger. This page keeps it in this browser until you export it. Upload hashes file bytes and stamps <code>timestamp</code> + <code>date_stamp</code>. No unspoken words.</p>
       <div class="workgrid">
         <form id="ws-form" autocomplete="off">
           <div class="row2">
@@ -391,9 +394,10 @@ export function renderHome(stats) {
             <button type="button" class="ghost" id="btn-break">Break</button>
             <button type="button" class="ghost" id="btn-show">Show</button>
             <button type="button" class="ghost" id="btn-verify">Verify</button>
+            <button type="button" class="ghost" id="btn-health">Health</button>
+            <button type="button" class="ghost" id="btn-skill">Skill</button>
             <button type="button" class="ghost" id="btn-lattice">Hardening</button>
             <button type="button" class="ghost" id="btn-upload">Upload envelope</button>
-            <button type="button" class="ghost" id="btn-doctor">Doctor</button>
             <label class="filebtn">Import JSONL <input type="file" id="import-json" accept="application/json,.json,.jsonl"></label>
             <button type="button" class="ghost" id="btn-export">Export</button>
             <button type="button" class="ghost" id="btn-clear">Clear local ledger</button>
@@ -516,12 +520,22 @@ export function renderHome(stats) {
         });
         $("raw-json").textContent = JSON.stringify(lastResult || { ledger: ledger }, null, 2);
       }
+      function isGetOp(path) {
+        return path === "/v1/health" || path === "/v1/skill" || path === "/v1/doctor";
+      }
       async function api(path, body) {
+        var get = isGetOp(path);
         var res = await fetch(path, {
-          method: path.indexOf("/v1/doctor") === 0 ? "GET" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: path.indexOf("/v1/doctor") === 0 ? undefined : JSON.stringify(body || {})
+          method: get ? "GET" : "POST",
+          headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+          body: get ? undefined : JSON.stringify(body || {})
         });
+        var ctype = (res.headers.get("Content-Type") || "");
+        if (path === "/v1/skill" || ctype.indexOf("text/markdown") !== -1) {
+          var text = await res.text();
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return { ok: true, action: "skill", skill: text };
+        }
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
         return data;
@@ -551,8 +565,9 @@ export function renderHome(stats) {
       $("btn-break").onclick = function () { run(function () { return api("/v1/break", fields()); }, "BROKEN appended. Original seal stays."); };
       $("btn-show").onclick = function () { run(function () { return api("/v1/show", fields()); }, "Show walked the local ledger."); };
       $("btn-verify").onclick = function () { run(function () { return api("/v1/verify", { ledger: ledger }); }, "Verify walked hashes and prev links."); };
+      $("btn-health").onclick = function () { run(function () { return api("/v1/health", {}); }, "Health. Catalog FragGate op. No writes."); };
+      $("btn-skill").onclick = function () { run(function () { return api("/v1/skill", {}); }, "Skill. Catalog FragGate op."); };
       $("btn-lattice").onclick = function () { run(function () { return api("/v1/lattice", { ledger: ledger }); }, "Hardening walk: links + state machine."); };
-      $("btn-doctor").onclick = function () { run(function () { return api("/v1/doctor", {}); }, "Doctor / debug. No writes."); };
       $("btn-upload").onclick = async function () {
         var f = $("upload-file").files && $("upload-file").files[0];
         if (!f) { setStatus("bad", "Choose a file to hash. Bytes are not stored as a transcript."); return; }

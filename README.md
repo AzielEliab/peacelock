@@ -47,7 +47,8 @@ The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
 - Direct tarball: [peacelock-0.1.0.tar.gz](https://peacelock-download-tracker.vibelock.workers.dev/download?asset=peacelock-0.1.0.tar.gz)
 - One-click install: [https://peacelock-download-tracker.vibelock.workers.dev/install.sh](https://peacelock-download-tracker.vibelock.workers.dev/install.sh)
 - Skill: [https://peacelock-download-tracker.vibelock.workers.dev/v1/skill](https://peacelock-download-tracker.vibelock.workers.dev/v1/skill)
-- Worker MCP: [https://peacelock-download-tracker.vibelock.workers.dev/mcp](https://peacelock-download-tracker.vibelock.workers.dev/mcp) — GET docs / POST JSON-RPC (health/skill/open/seal/verify)
+- FragGate proxy: [list](https://peacelock-download-tracker.vibelock.workers.dev/v1/fraggate/list) · describe · [call](https://peacelock-download-tracker.vibelock.workers.dev/v1/fraggate/call) via AZIEL_RUNTIME
+- Worker MCP: [https://peacelock-download-tracker.vibelock.workers.dev/mcp](https://peacelock-download-tracker.vibelock.workers.dev/mcp) — GET docs / POST JSON-RPC (health/skill/open/seal/break/show/verify)
 - OpenAPI: [https://peacelock-download-tracker.vibelock.workers.dev/openapi.json](https://peacelock-download-tracker.vibelock.workers.dev/openapi.json)
 - GitHub: [https://github.com/AzielEliab/peacelock](https://github.com/AzielEliab/peacelock)
 - Cite: [cite.json](https://peacelock-download-tracker.vibelock.workers.dev/cite.json) — Eliab, Aziel. (2026). PeaceLock 0.1.0 [Software]. Apache-2.0. No Zenodo DOI is invented here; a software deposit is still needed.
@@ -77,9 +78,10 @@ Direct tarball (also counted): [peacelock-0.1.0.tar.gz](https://peacelock-downlo
 `peacelock ui` serves a loopback dashboard at http://127.0.0.1:8768
 
 Binds to `127.0.0.1` only. Self-contained HTML (no CDN). Open / seal /
-break / show / verify a local ledger in a process tmp dir. Upload
-attaches evidence metadata (file SHA-256 + timestamp + date stamp).
-Transcript is always ABSENT.
+break / show / verify / health / skill a local ledger in a process tmp
+dir (catalog labels). Upload attaches evidence metadata (file SHA-256 +
+timestamp + date stamp). Transcript is always ABSENT. `peacelock doctor`
+stays CLI-only — not a FragGate live op.
 
 ## CLI smoke
 
@@ -165,7 +167,7 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
 - Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp` (FragGate slug `peacelock`)
 
-Agents use this Worker `/mcp` (thin doubles of health/skill/open/seal/verify) or OpenAPI/MCP via aziel-runtime. Humans use the complete Worker UI (open/seal/break/show/verify, upload, import/export, doctor). Dual surface: do not gut the human UI.
+Agents use this Worker `/mcp` (thin doubles of health/skill/open/seal/break/show/verify) or OpenAPI/MCP via aziel-runtime. This Worker `/v1/fraggate/*` PROXIES list/describe/call via AZIEL_RUNTIME. Humans use the complete Worker UI (catalog labels: open/seal/break/show/verify/health/skill, plus upload, import/export). Dual surface: do not gut the human UI. `peacelock doctor` is a local CLI self-check — not a FragGate LIVE_OPS.
 
 Always send `User-Agent: Mozilla/5.0`.
 
@@ -190,7 +192,7 @@ Author: **Aziel Eliab**. Honest scope: quiet-window receipts, not transcripts.
 - This Worker skill: `GET https://peacelock-download-tracker.vibelock.workers.dev/v1/skill`
 - This Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
 
-Local UI: **Import JSONL** and **Export JSONL**. Upload file option hashes bytes and stamps timestamp + date. Then `peacelock doctor`.
+Local UI labels match catalog: Open / Seal / Break / Show / Verify / Health / Skill. Upload file option hashes bytes and stamps timestamp + date. CLI `peacelock doctor` remains a local self-check — not a FragGate live op.
 
 Counted download (gzip HTTP 200, no 302): https://peacelock-download-tracker.vibelock.workers.dev/download?asset=peacelock-0.1.0.tar.gz
 GitHub: https://github.com/AzielEliab/peacelock

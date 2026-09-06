@@ -24,12 +24,15 @@ def test_seo_and_softwareapplication_json_ld() -> None:
 
 
 def test_workspace_calls_real_ops() -> None:
-    for path in ("/v1/open", "/v1/seal", "/v1/break", "/v1/show", "/v1/verify", "/v1/upload"):
+    for path in ("/v1/open", "/v1/seal", "/v1/break", "/v1/show", "/v1/verify", "/v1/upload", "/v1/health", "/v1/skill"):
         assert path in HOME
     assert "btn-open" in HOME
     assert "btn-seal" in HOME
     assert "btn-break" in HOME
     assert "btn-verify" in HOME
+    assert "btn-health" in HOME
+    assert "btn-skill" in HOME
+    assert "btn-doctor" not in HOME
     assert "Use UI" in HOME or "Quiet workspace" in HOME
 
 

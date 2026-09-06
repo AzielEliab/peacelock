@@ -2,8 +2,11 @@
  * PeaceLock hosted runtime (port of canon/receipt/chain).
  * Stateless: client sends the ledger JSON in the body. Transcript always ABSENT.
  * /v1 never touches DOWNLOADS KV.
+ * Door paths (`/v1/fraggate/*`, `/v1/runtime/*`) PROXY to aziel-runtime via AZIEL_RUNTIME.
+ * Local ops are single-segment `/v1/{op}` only.
  * Author: Aziel Eliab only.
  */
+import { classifyV1Path, doorTargetUrl } from "./door.js";
 const PRODUCT = "peacelock";
 const VERSION = "0.1.0";
 const MOTTO = "Chosen silence / chosen inaction as a first-class receipt.";
@@ -15,7 +18,7 @@ const ACTOR = "operator";
 const HOST = "https://peacelock-download-tracker.vibelock.workers.dev";
 const SKILL = `---
 name: PeaceLock
-description: Use when opening, sealing, breaking, or verifying a chosen-silence / chosen-inaction receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Hosted API is stateless. Dual surface: Worker /v1 + POST /mcp, or aziel-runtime FragGate slug peacelock. Author Aziel Eliab.
+description: Use when opening, sealing, breaking, or verifying a chosen-silence / chosen-inaction receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Hosted API is stateless. Dual surface: Worker /v1 + POST /mcp, or aziel-runtime FragGate slug peacelock. This Worker /v1/fraggate/* PROXIES list/describe/call via AZIEL_RUNTIME. Author Aziel Eliab.
 ---
 
 # PeaceLock
@@ -37,19 +40,22 @@ Host: \`https://peacelock-download-tracker.vibelock.workers.dev\`
 
 | Method | Path | What |
 |--------|------|------|
-| GET | \`/v1/health\` | Liveness. Does not increment downloads. |
-| GET | \`/v1/skill\` | This markdown. Does not increment downloads. |
-| GET | \`/v1/example\` | Sample open payload. Does not increment downloads. |
-| GET | \`/v1/doctor\` | Hosted self-check (no writes). Does not increment downloads. |
-| POST | \`/v1/open\` | Open a quiet window. HARD_DUTY refused. Client may send ledger. |
-| POST | \`/v1/seal\` | Seal OPEN → SEALED. HARD_DUTY refused. |
-| POST | \`/v1/break\` | Append BROKEN. Original seal stays. |
-| POST | \`/v1/show\` | Return the client-held ledger (filtered by pl_id). |
-| POST | \`/v1/verify\` | Walk hashes and prev links. Not stored. |
-| POST | \`/v1/lattice\` | Verify receipt links + state machine. |
-| POST | \`/v1/upload\` | Attach evidence envelope (file hash + timestamp + date stamp). |
+| GET | \`/v1/health\` | Liveness. FragGate LIVE_OPS. Does not increment downloads. |
+| GET | \`/v1/skill\` | This markdown. FragGate LIVE_OPS. Does not increment downloads. |
+| GET | \`/v1/example\` | Sample open payload. Worker-local. Does not increment downloads. |
+| GET | \`/v1/doctor\` | Worker-local self-check (no writes). **Not** a FragGate LIVE_OPS — do not invent \`doctor\` on the catalog door. |
+| GET | \`/v1/fraggate/list\` | PROXY to aziel-runtime GET /v1/fraggate/list via AZIEL_RUNTIME. Not a local op. |
+| GET | \`/v1/fraggate/describe\` | PROXY to aziel-runtime GET /v1/fraggate/describe (\`?name=\` / \`?slug=\`). Not a local op. |
+| POST | \`/v1/fraggate/call\` | PROXY to aziel-runtime POST /v1/fraggate/call. Not a local op. |
+| POST | \`/v1/open\` | Open a quiet window. HARD_DUTY refused. FragGate LIVE_OPS. |
+| POST | \`/v1/seal\` | Seal OPEN → SEALED. HARD_DUTY refused. FragGate LIVE_OPS. |
+| POST | \`/v1/break\` | Append BROKEN. Original seal stays. FragGate LIVE_OPS. |
+| POST | \`/v1/show\` | Return the client-held ledger (filtered by pl_id). FragGate LIVE_OPS. |
+| POST | \`/v1/verify\` | Walk hashes and prev links. Not stored. FragGate LIVE_OPS. |
+| POST | \`/v1/lattice\` | Verify receipt links + state machine. Worker-local extra (not catalog live). |
+| POST | \`/v1/upload\` | Attach evidence envelope (file hash + timestamp + date stamp). Catalog name \`upload_envelope\`. |
 | GET | \`/mcp\` | Dual-surface MCP docs + FragGate pointer. Does not increment downloads. |
-| POST | \`/mcp\` | JSON-RPC MCP-over-HTTP. Thin doubles of health/skill/open/seal/verify (plus break/show/lattice/upload/doctor). |
+| POST | \`/mcp\` | JSON-RPC MCP-over-HTTP. Thin doubles of catalog labels health/skill/open/seal/break/show/verify (plus Worker-local lattice/upload/doctor/example). |
 
 OpenAPI: \`https://peacelock-download-tracker.vibelock.workers.dev/openapi.json\`
 
@@ -82,7 +88,11 @@ curl -s -A 'Mozilla/5.0' -X POST https://peacelock-download-tracker.vibelock.wor
 curl -s -A 'Mozilla/5.0' https://peacelock-download-tracker.vibelock.workers.dev/v1/skill
 \`\`\`
 
-Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): \`POST\` this Worker \`/mcp\` (thin doubles of the human buttons) or the catalog MCP endpoint (FragGate slug peacelock).
+FragGate LIVE_OPS (slug \`peacelock\`): open, seal, break, show, verify, stamp, upload_envelope, health, skill.
+UI labels match that catalog set: Open / Seal / Break / Show / Verify / Health / Skill.
+Worker-local extras (not catalog live ops): doctor, lattice, example. \`peacelock doctor\` stays a local CLI self-check.
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): \`POST\` this Worker \`/mcp\` (thin doubles of the human buttons) or the catalog MCP endpoint (FragGate slug peacelock). This Worker \`/v1/fraggate/*\` PROXIES list/describe/call to aziel-runtime via AZIEL_RUNTIME.
 
 ## Local (after one-click install)
 
@@ -115,7 +125,7 @@ Author: **Aziel Eliab**. Honest scope: quiet-window receipts, not transcripts.
 - This Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
 - Sample payload: \`GET https://peacelock-download-tracker.vibelock.workers.dev/v1/example\`
 
-Local UI: **Import JSONL file** (\`type=file\`) and **Export JSONL**. Upload hashes file bytes and stamps timestamp + date. Then \`peacelock doctor\`.
+Local UI labels match catalog: Open / Seal / Break / Show / Verify / Health / Skill. Upload hashes file bytes and stamps timestamp + date. CLI \`peacelock doctor\` remains a local self-check — not a FragGate live op.
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients: \`POST https://peacelock-download-tracker.vibelock.workers.dev/mcp\` or catalog \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`.
 
@@ -139,7 +149,7 @@ function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent, Authorization",
   };
 }
 
@@ -552,9 +562,12 @@ function openapiSpec() {
     },
     servers: [{ url: HOST }],
     paths: {
-      "/v1/skill": { get: { operationId: "peacelock_skill", summary: "Return skill markdown. Does not increment download KV.", responses: { "200": { description: "markdown" } } } },
-      "/v1/health": { get: { operationId: "health", summary: "Liveness", responses: { "200": { description: "ok" } } } },
-      "/v1/doctor": { get: { operationId: "doctor", summary: "Hosted self-check. No writes.", responses: { "200": { description: "ok" } } } },
+      "/v1/skill": { get: { operationId: "peacelock_skill", summary: "Return skill markdown. FragGate LIVE_OPS. Does not increment download KV.", responses: { "200": { description: "markdown" } } } },
+      "/v1/health": { get: { operationId: "health", summary: "Liveness. FragGate LIVE_OPS.", responses: { "200": { description: "ok" } } } },
+      "/v1/doctor": { get: { operationId: "doctor", summary: "Worker-local self-check. No writes. Not a FragGate LIVE_OPS — catalog live ops are open/seal/break/show/verify/stamp/upload_envelope/health/skill.", responses: { "200": { description: "ok" } } } },
+      "/v1/fraggate/list": { get: { operationId: "peacelock_fraggate_list_proxy", summary: "PROXY to aziel-runtime GET /v1/fraggate/list via AZIEL_RUNTIME. Not a local op.", responses: { "200": { description: "hashed registry" } } } },
+      "/v1/fraggate/describe": { get: { operationId: "peacelock_fraggate_describe_proxy", summary: "PROXY to aziel-runtime GET /v1/fraggate/describe (?name= / ?slug=). Not a local op.", responses: { "200": { description: "describe" } } } },
+      "/v1/fraggate/call": { post: { operationId: "peacelock_fraggate_call_proxy", summary: "PROXY to aziel-runtime POST /v1/fraggate/call via AZIEL_RUNTIME. Not a local op.", requestBody: { content: { "application/json": { schema: { type: "object" } } } }, responses: { "200": { description: "FragGate ResultEnvelope" } } } },
       "/v1/open": { post: { operationId: "open", summary: "Open a quiet window. HARD_DUTY refused.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["mode", "channel", "act_class"], properties: { mode: { type: "string" }, channel: { type: "string" }, act_class: { type: "string" }, duty_check: { type: "string" }, note: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "opened" } } } },
       "/v1/seal": { post: { operationId: "seal", summary: "Seal OPEN → SEALED. HARD_DUTY refused.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["pl_id"], properties: { pl_id: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "sealed" } } } },
       "/v1/break": { post: { operationId: "break", summary: "Append BROKEN. Original seal stays.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["pl_id", "reason"], properties: { pl_id: { type: "string" }, reason: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "broken" } } } },
@@ -611,6 +624,8 @@ function aiHtml() {
 const CATALOG = "https://aziel-runtime.vibelock.workers.dev";
 const FRAGGATE_CALL = CATALOG + "/v1/fraggate/call";
 const CATALOG_MCP = CATALOG + "/mcp";
+/** Catalog LIVE_OPS for slug peacelock. doctor is Worker-local — not in this list. */
+const FRAGGATE_LIVE_OPS = ["open", "seal", "break", "show", "verify", "stamp", "upload_envelope", "health", "skill"];
 const MCP_OPS = ["health", "skill", "open", "seal", "verify", "break", "show", "lattice", "upload", "doctor", "example"];
 const MCP_TOOLS = MCP_OPS.map((op) => "peacelock_" + op);
 const MCP_REFUSED = [
@@ -637,10 +652,12 @@ function mcpDocs() {
     catalog_openapi: CATALOG + "/openapi.json",
     worker_openapi: HOST + "/openapi.json",
     agent_path: FRAGGATE_CALL,
+    this_worker_fraggate: HOST + "/v1/fraggate/call",
     body: { slug: "peacelock", op: "health", payload: {} },
     ops: MCP_OPS,
+    live_ops: FRAGGATE_LIVE_OPS,
     tools: MCP_TOOLS,
-    note: "POST JSON-RPC here to double the human quiet-window buttons (health/skill/open/seal/verify). Canonical agent path is the catalog MCP on aziel-runtime (FragGate slug peacelock).",
+    note: "POST JSON-RPC here to double the human quiet-window buttons (health/skill/open/seal/break/show/verify). This Worker /v1/fraggate/* PROXIES list/describe/call to aziel-runtime via AZIEL_RUNTIME. FragGate LIVE_OPS: open/seal/break/show/verify/stamp/upload_envelope/health/skill. doctor is Worker-local, not a catalog live op. Canonical agent path is the catalog MCP on aziel-runtime (FragGate slug peacelock).",
     kv_increment: false,
     kernel: "https://github.com/AzielEliab/fraggate",
   };
@@ -652,7 +669,7 @@ function mcpInitialize() {
     capabilities: { tools: { listChanged: false } },
     serverInfo: { name: "peacelock", version: VERSION },
     instructions:
-      "PeaceLock PL-WP-0.1 — chosen silence / chosen inaction as a first-class receipt. Dual surface: human Worker UI and this MCP share health/skill/open/seal/verify. Transcript always ABSENT. HARD_DUTY cannot be bypassed. Canonical catalog agent path is POST " +
+      "PeaceLock PL-WP-0.1 — chosen silence / chosen inaction as a first-class receipt. Dual surface: human Worker UI and this MCP share health/skill/open/seal/break/show/verify. Transcript always ABSENT. HARD_DUTY cannot be bypassed. This Worker /v1/fraggate/* PROXIES list/describe/call via AZIEL_RUNTIME. FragGate LIVE_OPS: open/seal/break/show/verify/stamp/upload_envelope/health/skill. doctor is Worker-local, not a catalog live op. Canonical catalog agent path is POST " +
       CATALOG_MCP +
       " or FragGate POST " +
       FRAGGATE_CALL +
@@ -672,7 +689,7 @@ function mcpToolSchemas() {
     { name: "peacelock_show", description: "Return the client-held ledger. Same as POST /v1/show.", inputSchema: { type: "object", properties: { pl_id: { type: "string" }, ledger } } },
     { name: "peacelock_lattice", description: "Verify receipt links + state machine. Same as POST /v1/lattice.", inputSchema: { type: "object", properties: { ledger } } },
     { name: "peacelock_upload", description: "Attach evidence envelope (file hash + timestamp + date stamp). Same as POST /v1/upload.", inputSchema: { type: "object", properties: { file_sha256: { type: "string" }, file_name: { type: "string" }, timestamp: { type: "string" }, date_stamp: { type: "string" }, ledger } } },
-    { name: "peacelock_doctor", description: "Hosted self-check. No writes. Same as GET /v1/doctor.", inputSchema: { type: "object", properties: {} } },
+    { name: "peacelock_doctor", description: "Worker-local self-check. No writes. Same as GET /v1/doctor. Not a FragGate LIVE_OPS — UI Health maps to peacelock_health.", inputSchema: { type: "object", properties: {} } },
     { name: "peacelock_example", description: "Sample open payload. Same as GET /v1/example.", inputSchema: { type: "object", properties: {} } },
   ];
 }
@@ -696,11 +713,11 @@ function refusedMcpOp(name) {
 async function runMcpOp(op, body) {
   const payload = body && typeof body === "object" ? body : {};
   if (op === "health") {
-    return { ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, role: ROLE, motto: MOTTO, spec: SPEC, kv_increment: false, note: "Hosted /v1 and /mcp do not store ledgers. Transcript is always ABSENT." };
+    return { ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, role: ROLE, motto: MOTTO, spec: SPEC, kv_increment: false, door: "fraggate", slug: "peacelock", live_ops: FRAGGATE_LIVE_OPS, note: "Hosted /v1 and /mcp do not store ledgers. Transcript is always ABSENT. FragGate LIVE_OPS: open/seal/break/show/verify/stamp/upload_envelope/health/skill." };
   }
   if (op === "skill") return { skill: SKILL };
   if (op === "doctor") {
-    return { ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, identity: "Aziel Eliab only", hard_duty: "refuse open and seal", transcript: ABSENT, network: false };
+    return { ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, identity: "Aziel Eliab only", hard_duty: "refuse open and seal", transcript: ABSENT, network: false, worker_local: true, fraggate_live: false, note: "Worker-local self-check. Not a FragGate LIVE_OPS. UI Health maps to GET /v1/health." };
   }
   if (op === "example") {
     return { mode: "SILENCE", channel: "email", act_class: "reply", duty_check: "NONE", note: "window only", author: AUTHOR, spec: SPEC };
@@ -819,7 +836,50 @@ async function handleMcp(request) {
   return json({ error: "method not allowed", hint: "GET or POST /mcp" }, 405);
 }
 
-export async function handleRuntimeApi(request, url) {
+function runtimeFetcher(env) {
+  if (env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function") return env.AZIEL_RUNTIME;
+  return null;
+}
+
+async function proxyDoor(request, url, env) {
+  const dest = doorTargetUrl(url.pathname, request.url, env);
+  if (!dest) {
+    return json({ ok: false, error: "not a door path", path: url.pathname, door: "fraggate" }, 404);
+  }
+  const headers = new Headers();
+  const pass = ["content-type", "accept", "authorization", "user-agent", "mcp-protocol-version", "mcp-session-id", "x-aziel-runtime-token"];
+  for (const name of pass) {
+    const v = request.headers.get(name);
+    if (v) headers.set(name, v);
+  }
+  if (!headers.has("User-Agent")) headers.set("User-Agent", "Mozilla/5.0 PeaceLock/0.1.0");
+  const init = { method: request.method, headers, redirect: "follow" };
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    init.body = request.body;
+    init.duplex = "half";
+  }
+  try {
+    const fetcher = runtimeFetcher(env);
+    const res = fetcher ? await fetcher.fetch(dest, init) : await fetch(dest, init);
+    const outHeaders = new Headers(res.headers);
+    for (const [k, v] of Object.entries(corsHeaders())) outHeaders.set(k, v);
+    outHeaders.set("X-Aziel-Door", "proxy");
+    outHeaders.set("X-Aziel-Door-Origin", dest);
+    return new Response(res.body, { status: res.status, statusText: res.statusText, headers: outHeaders });
+  } catch (exc) {
+    return json({
+      ok: false,
+      error: "fraggate_proxy_failed",
+      detail: String(exc).slice(0, 240),
+      origin: dest,
+      agent_path: FRAGGATE_CALL,
+      door: "fraggate",
+      slug: "peacelock",
+    }, 502);
+  }
+}
+
+export async function handleRuntimeApi(request, url, env) {
   const stripped = url.pathname.replace(/\/+$/, "") || "/";
   if (stripped === "/mcp") {
     try {
@@ -829,12 +889,27 @@ export async function handleRuntimeApi(request, url) {
       return json({ error: String(err.message || err), motto: MOTTO, ok: false }, status);
     }
   }
+  const classified = classifyV1Path(url.pathname);
+  if (classified.kind === "door") {
+    return proxyDoor(request, url, env);
+  }
   const path = url.pathname;
   const isApi = path === "/v1" || path.startsWith("/v1/") || path === "/openapi.json" || path === "/ai";
   if (!isApi) return null;
+  if (classified.kind === "multi") {
+    return json({
+      ok: false,
+      error: "not a local op",
+      code: "NOT_LOCAL_OP",
+      path: classified.path,
+      hint: "Local ops are GET|POST /v1/{op} only (single segment). FragGate door is /v1/fraggate/list, /v1/fraggate/describe, /v1/fraggate/call (proxied to aziel-runtime via AZIEL_RUNTIME).",
+      agent_path: FRAGGATE_CALL,
+      live_ops: FRAGGATE_LIVE_OPS,
+    }, 404);
+  }
   try {
     if (path === "/v1/health" && request.method === "GET") {
-      return json({ ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, role: ROLE, motto: MOTTO, spec: SPEC, note: "Hosted /v1 does not store ledgers. Transcript is always ABSENT." });
+      return json({ ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, role: ROLE, motto: MOTTO, spec: SPEC, door: "fraggate", slug: "peacelock", live_ops: FRAGGATE_LIVE_OPS, note: "Hosted /v1 does not store ledgers. Transcript is always ABSENT. FragGate LIVE_OPS: open/seal/break/show/verify/stamp/upload_envelope/health/skill." });
     }
     if (path === "/v1/skill" && request.method === "GET") {
       return new Response(SKILL, { status: 200, headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "private, no-store", ...corsHeaders() } });
@@ -844,7 +919,7 @@ export async function handleRuntimeApi(request, url) {
       return new Response(aiHtml(), { headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders() } });
     }
     if (path === "/v1/doctor" && request.method === "GET") {
-      return json({ ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, identity: "Aziel Eliab only", hard_duty: "refuse open and seal", transcript: ABSENT, network: false });
+      return json({ ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, identity: "Aziel Eliab only", hard_duty: "refuse open and seal", transcript: ABSENT, network: false, worker_local: true, fraggate_live: false, note: "Worker-local self-check. Not a FragGate LIVE_OPS. UI Health maps to GET /v1/health." });
     }
     if (path === "/v1/example" && request.method === "GET") {
       return json({ mode: "SILENCE", channel: "email", act_class: "reply", duty_check: "NONE", note: "window only", author: AUTHOR, spec: SPEC });
@@ -871,7 +946,7 @@ export async function handleRuntimeApi(request, url) {
       const rec = await verify(ledger);
       return json({ product: PRODUCT, version: VERSION, author: AUTHOR, ...(await verifyLattice(ledger, rec.errors)) });
     }
-    return json({ error: "not found" }, 404);
+    return json({ error: "not found", hint: "GET /v1/health GET /v1/skill POST /v1/{open,seal,break,show,verify} GET /v1/fraggate/list GET /v1/fraggate/describe POST /v1/fraggate/call", live_ops: FRAGGATE_LIVE_OPS }, 404);
   } catch (err) {
     const status = err instanceof HardDutyError ? 409 : 400;
     return json({ error: String(err.message || err), motto: MOTTO, ok: false }, status);

@@ -1,6 +1,6 @@
 ---
 name: PeaceLock
-description: Use when opening, sealing, breaking, or verifying a chosen-silence / chosen-inaction receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Hosted API is stateless. Dual surface: Worker /v1 + POST /mcp, or aziel-runtime FragGate slug peacelock. Author Aziel Eliab.
+description: Use when opening, sealing, breaking, or verifying a chosen-silence / chosen-inaction receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Hosted API is stateless. Dual surface: Worker /v1 + POST /mcp, or aziel-runtime FragGate slug peacelock. This Worker /v1/fraggate/* PROXIES list/describe/call via AZIEL_RUNTIME. Author Aziel Eliab.
 ---
 
 # PeaceLock
@@ -22,19 +22,22 @@ Host: `https://peacelock-download-tracker.vibelock.workers.dev`
 
 | Method | Path | What |
 |--------|------|------|
-| GET | `/v1/health` | Liveness. Does not increment downloads. |
-| GET | `/v1/skill` | This markdown. Does not increment downloads. |
-| GET | `/v1/example` | Sample open payload. Does not increment downloads. |
-| GET | `/v1/doctor` | Hosted self-check (no writes). Does not increment downloads. |
-| POST | `/v1/open` | Open a quiet window. HARD_DUTY refused. Client may send ledger. |
-| POST | `/v1/seal` | Seal OPEN → SEALED. HARD_DUTY refused. |
-| POST | `/v1/break` | Append BROKEN. Original seal stays. |
-| POST | `/v1/show` | Return the client-held ledger (filtered by pl_id). |
-| POST | `/v1/verify` | Walk hashes and prev links. Not stored. |
-| POST | `/v1/lattice` | Verify receipt links + state machine. |
-| POST | `/v1/upload` | Attach evidence envelope (file hash + timestamp + date stamp). |
+| GET | `/v1/health` | Liveness. FragGate LIVE_OPS. Does not increment downloads. |
+| GET | `/v1/skill` | This markdown. FragGate LIVE_OPS. Does not increment downloads. |
+| GET | `/v1/example` | Sample open payload. Worker-local. Does not increment downloads. |
+| GET | `/v1/doctor` | Worker-local self-check (no writes). **Not** a FragGate LIVE_OPS — do not invent `doctor` on the catalog door. |
+| GET | `/v1/fraggate/list` | PROXY to aziel-runtime GET /v1/fraggate/list via AZIEL_RUNTIME. Not a local op. |
+| GET | `/v1/fraggate/describe` | PROXY to aziel-runtime GET /v1/fraggate/describe (`?name=` / `?slug=`). Not a local op. |
+| POST | `/v1/fraggate/call` | PROXY to aziel-runtime POST /v1/fraggate/call. Not a local op. |
+| POST | `/v1/open` | Open a quiet window. HARD_DUTY refused. FragGate LIVE_OPS. |
+| POST | `/v1/seal` | Seal OPEN → SEALED. HARD_DUTY refused. FragGate LIVE_OPS. |
+| POST | `/v1/break` | Append BROKEN. Original seal stays. FragGate LIVE_OPS. |
+| POST | `/v1/show` | Return the client-held ledger (filtered by pl_id). FragGate LIVE_OPS. |
+| POST | `/v1/verify` | Walk hashes and prev links. Not stored. FragGate LIVE_OPS. |
+| POST | `/v1/lattice` | Verify receipt links + state machine. Worker-local extra (not catalog live). |
+| POST | `/v1/upload` | Attach evidence envelope (file hash + timestamp + date stamp). Catalog name `upload_envelope`. |
 | GET | `/mcp` | Dual-surface MCP docs + FragGate pointer. Does not increment downloads. |
-| POST | `/mcp` | JSON-RPC MCP-over-HTTP. Thin doubles of health/skill/open/seal/verify (plus break/show/lattice/upload/doctor). |
+| POST | `/mcp` | JSON-RPC MCP-over-HTTP. Thin doubles of catalog labels health/skill/open/seal/break/show/verify (plus Worker-local lattice/upload/doctor/example). |
 
 OpenAPI: `https://peacelock-download-tracker.vibelock.workers.dev/openapi.json`
 
@@ -67,7 +70,11 @@ curl -s -A 'Mozilla/5.0' -X POST https://peacelock-download-tracker.vibelock.wor
 curl -s -A 'Mozilla/5.0' https://peacelock-download-tracker.vibelock.workers.dev/v1/skill
 ```
 
-Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): `POST` this Worker `/mcp` (thin doubles of the human buttons) or the catalog MCP endpoint (FragGate slug peacelock).
+FragGate LIVE_OPS (slug `peacelock`): open, seal, break, show, verify, stamp, upload_envelope, health, skill.
+UI labels match that catalog set: Open / Seal / Break / Show / Verify / Health / Skill.
+Worker-local extras (not catalog live ops): doctor, lattice, example. `peacelock doctor` stays a local CLI self-check.
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): `POST` this Worker `/mcp` (thin doubles of the human buttons) or the catalog MCP endpoint (FragGate slug peacelock). This Worker `/v1/fraggate/*` PROXIES list/describe/call to aziel-runtime via AZIEL_RUNTIME.
 
 ## Local (after one-click install)
 
@@ -100,7 +107,7 @@ Author: **Aziel Eliab**. Honest scope: quiet-window receipts, not transcripts.
 - This Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
 - Sample payload: `GET https://peacelock-download-tracker.vibelock.workers.dev/v1/example`
 
-Local UI: **Import JSONL file** (`type=file`) and **Export JSONL**. Upload hashes file bytes and stamps timestamp + date. Then `peacelock doctor`.
+Local UI labels match catalog: Open / Seal / Break / Show / Verify / Health / Skill. Upload hashes file bytes and stamps timestamp + date. CLI `peacelock doctor` remains a local self-check — not a FragGate live op.
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients: `POST https://peacelock-download-tracker.vibelock.workers.dev/mcp` or catalog `POST https://aziel-runtime.vibelock.workers.dev/mcp`.
 
