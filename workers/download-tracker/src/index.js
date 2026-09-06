@@ -7,6 +7,7 @@ import { handleRuntimeApi } from "./runtime.js";
  * GET  /download?repo=AzielEliab/peacelock&tag=latest&asset=...
  *      increments KV, serves gzip via ASSETS.fetch (no 302)
  *      (default https://github.com/AzielEliab/peacelock/releases)
+ * /v1, /mcp, and /v1/mesh/* do not increment.
  * GET  /count   JSON {project, views, downloads, total} — total = downloads (azhub convention)
  * GET  /stats   JSON totals + per-repo + per-branch breakdown
  * POST /event   forks report a download {owner,repo,branch,fork,asset}

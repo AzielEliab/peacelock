@@ -13,6 +13,7 @@ GET `/count` returns `{project, views, downloads, total}` (azhub convention: `to
 GET `/install.sh` one-click install (does not increment; script curls `/download`).
 GET `/v1/skill` returns skill markdown (`text/markdown`). Does not increment views or downloads.
 GET `/v1/fraggate/list`, GET `/v1/fraggate/describe`, POST `/v1/fraggate/call` PROXY to aziel-runtime via the `AZIEL_RUNTIME` service binding. Not local ops. `/v1/runtime/{list,describe,call}` aliases map to those door paths.
+`/v1/mesh/*` PROXY to aziel-runtime suite mesh (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Human UI Live Nodes strip polls `GET /v1/mesh`.
 GET `/mcp` returns dual-surface MCP docs + FragGate pointer (`slug=peacelock`). Does not increment.
 POST `/mcp` is JSON-RPC MCP-over-HTTP (`initialize`, `tools/list`, `tools/call`) doubling catalog labels health/skill/open/seal/break/show/verify.
 UI Health / Skill map to catalog LIVE_OPS. `GET /v1/doctor` is Worker-local only — not a FragGate live op.

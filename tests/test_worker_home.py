@@ -83,3 +83,16 @@ def test_home_and_seo_advertise_worker_mcp() -> None:
     assert 'href="/mcp"' in HOME
     assert "/mcp" in HOME
     assert "catalog_mcp" in HOME or "aziel-runtime.vibelock.workers.dev" in HOME
+
+
+def test_home_live_nodes_strip() -> None:
+    assert 'id="meshStrip"' in HOME
+    assert "Live Nodes" in HOME
+    assert "QNM-BUILD-1.0" in HOME
+    assert "No Node Gate" in HOME
+    assert "No auto-heal" in HOME
+    assert "Not an anonymity network" in HOME
+    assert "/v1/mesh" in HOME
+    assert 'id="meshLiveCount"' in HOME
+    assert 'id="node-gate"' not in HOME
+    assert 'href="/node-gate"' not in HOME

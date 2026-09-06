@@ -132,6 +132,12 @@ PeaceLock sits beside [TemporalLock](https://github.com/AzielEliab/temporallock)
 (timeslate lattice) and [ShadowLock](https://github.com/AzielEliab/shadowlock)
 (zero-retention observation). It does not replace them.
 
+The Worker homepage shows a suite Live Nodes strip. `/v1/fraggate/*`,
+`/v1/runtime/*`, and `/v1/mesh/*` PROXY to aziel-runtime. Suite mesh
+default OFF. QNM rollup is live|locked|isolated counts only. No Node
+Gate. No auto-heal. Not an anonymity network. Anon-broadcast is not a
+publish path. PeaceLock remains a quiet-window receipt lattice.
+
 ---
 
 ## 6. CLI

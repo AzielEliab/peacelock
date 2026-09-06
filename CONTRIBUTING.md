@@ -34,7 +34,12 @@ pytest is the dev extra. No network.
 8. **I7 Append-only** OPEN → SEALED → optional BROKEN.
 9. **I8 Break appends BROKEN.** The original seal stays.
 10. **Not a gag-order kit, wiretap, or third-party binding.**
-11. New behavior needs a test that fails without the change.
+11. **Door vs local op.** `/v1/fraggate/*`, `/v1/runtime/*`, and
+    `/v1/mesh/*` PROXY to aziel-runtime. Local ops are `/v1/{op}` only.
+    Never treat `fraggate/call` or `mesh/status` as a local op name.
+    Suite mesh default OFF; QNM rollup live|locked|isolated; no Node Gate;
+    no auto-heal; not anonymity.
+12. New behavior needs a test that fails without the change.
 
 ## Where to change things
 
@@ -43,6 +48,7 @@ pytest is the dev extra. No network.
 - Ledger / lattice: `peacelock/chain.py`, `peacelock/lattice.py`
 - CLI: `peacelock/cli.py`
 - Errors: `peacelock/errors.py`
+- Suite mesh / QNM Live Nodes: `workers/download-tracker/src/mesh.js` (`/v1/mesh/*` PROXY to aziel-runtime).
 
 ## License of contributions
 

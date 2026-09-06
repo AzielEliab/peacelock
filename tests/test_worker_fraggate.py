@@ -95,3 +95,19 @@ def test_docs_advertise_fraggate_proxy() -> None:
     assert "/v1/fraggate/describe" in SKILL
     assert "/v1/fraggate/call" in SKILL
     assert "Aziel Eliab" in README
+
+
+def test_door_classifies_mesh_as_door() -> None:
+    assert '"mesh"' in DOOR
+    assert "/v1/mesh" in DOOR
+    assert 'path === "/v1/mesh"' in DOOR or 'path.startsWith("/v1/mesh/")' in DOOR
+
+
+def test_ui_has_live_nodes_strip() -> None:
+    assert 'id="meshStrip"' in HOME
+    assert "Live Nodes" in HOME
+    assert "QNM-BUILD-1.0" in HOME
+    assert "No Node Gate" in HOME
+    assert "No auto-heal" in HOME
+    assert "/v1/mesh" in HOME
+    assert 'id="node-gate"' not in HOME

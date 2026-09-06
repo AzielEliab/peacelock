@@ -52,6 +52,15 @@ def test_mcp_points_at_fraggate_slug_peacelock() -> None:
     assert "AZIEL_RUNTIME" in RUNTIME or "env.AZIEL_RUNTIME" in RUNTIME
 
 
+def test_mcp_and_openapi_point_at_suite_mesh() -> None:
+    assert "meshPointer" in RUNTIME
+    assert "meshOpenApiPaths" in RUNTIME
+    assert "/v1/mesh" in RUNTIME
+    assert "QNM-BUILD-1.0" in RUNTIME
+    assert "No Node Gate" in RUNTIME
+    assert "mesh_*" in RUNTIME or "mesh_\\*" in RUNTIME
+
+
 def test_mcp_refuses_transcript_and_duty_bypass() -> None:
     for name in ("transcript", "motive", "counterfactual", "waive-duty", "bypass-duty"):
         assert name in RUNTIME
