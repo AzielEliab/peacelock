@@ -29,7 +29,7 @@ function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent",
   };
 }
 
@@ -53,6 +53,8 @@ export function citePayload() {
     install: HOST + "/install.sh",
     openapi: HOST + "/openapi.json",
     skill: HOST + "/v1/skill",
+    mcp: HOST + "/mcp",
+    catalog_mcp: CATALOG + "mcp",
     catalog: CATALOG,
     catalog_product: CATALOG_PRODUCT,
     license: "Apache-2.0",
@@ -95,7 +97,7 @@ export function jsonLd() {
 }
 
 function sitemapXml() {
-  const paths = ["/", "/download", "/install.sh", "/v1/skill", "/v1/example", "/v1/health", "/openapi.json", "/cite.json", "/llms.txt", "/ai"];
+  const paths = ["/", "/download", "/install.sh", "/v1/skill", "/v1/example", "/v1/health", "/openapi.json", "/mcp", "/cite.json", "/llms.txt", "/ai"];
   const urls = paths.map((p) => `  <url><loc>${HOST}${p === "/" ? "/" : p}</loc></url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -169,8 +171,11 @@ Download: ${HOST}/download
 Install: ${HOST}/install.sh
 OpenAPI: ${HOST}/openapi.json
 Skill: ${HOST}/v1/skill
+MCP: ${HOST}/mcp
+Catalog MCP: ${CATALOG}mcp (FragGate slug peacelock)
 Cite: ${HOST}/cite.json
 Ops: POST /v1/open, POST /v1/seal, POST /v1/break, POST /v1/verify, POST /v1/upload
+MCP tools: peacelock_health, peacelock_skill, peacelock_open, peacelock_seal, peacelock_verify
 Identity: Aziel Eliab only
 License: Apache-2.0
 Forks: welcome and always allowed
@@ -333,6 +338,7 @@ export function renderHome(stats) {
         <a href="#install">Download / install</a>
         <a href="#cite">Cite</a>
         <a href="/v1/skill">Skill</a>
+        <a href="/mcp">MCP</a>
         <a href="/openapi.json">OpenAPI</a>
         <a href="${GITHUB_REPO}">GitHub</a>
       </nav>
@@ -426,7 +432,7 @@ export function renderHome(stats) {
       <p class="iso">Isolated counter: Worker <code>peacelock-download-tracker</code>, project <code>peacelock</code>, KV <code>PEACELOCK_DOWNLOADS</code>. Not mixed with any other product. /v1 does not increment downloads.</p>
       <p class="meta">GitHub: stars ${gh.stars || 0} · forks ${gh.forks || 0} · watchers ${gh.watchers || 0} · release assets ${gh.release_download_count || 0}</p>
       <p class="meta">Lattice kin: <a href="${TEMPORALLOCK_HOST}/">TemporalLock</a> · <a href="${SHADOWLOCK_HOST}/">ShadowLock</a> · <a href="${DECISIONGATE_HOST}/">DecisionGATE</a> · <a href="https://github.com/AzielEliab/fraggate">FragGate</a> · <a href="${CATALOG}">aziel-runtime</a> · <a href="https://www.azielcorpuslibrary.net/">library</a> · <a href="https://godlock.uk/">godlock.uk</a> · <a href="https://www.azieleliab.com/">www.azieleliab.com</a></p>
-      <p class="meta"><a href="/stats">JSON stats</a> · <a href="/count">/count</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/skill">Skill</a> · <a href="/v1/example">Example</a> · <a href="/ai">AI runtime</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_LATEST}">releases</a></p>
+      <p class="meta"><a href="/stats">JSON stats</a> · <a href="/count">/count</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/mcp">MCP</a> · <a href="/v1/skill">Skill</a> · <a href="/v1/example">Example</a> · <a href="/ai">AI runtime</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_LATEST}">releases</a></p>
       <h3>Per repo / branch / fork</h3>
       <ul>${breakdownList(stats)}</ul>
     </section>
