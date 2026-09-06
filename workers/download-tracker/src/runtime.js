@@ -1,0 +1,650 @@
+/**
+ * PeaceLock hosted runtime (port of canon/receipt/chain).
+ * Stateless: client sends the ledger JSON in the body. Transcript always ABSENT.
+ * /v1 never touches DOWNLOADS KV.
+ * Author: Aziel Eliab only.
+ */
+const PRODUCT = "peacelock";
+const VERSION = "0.1.0";
+const MOTTO = "Chosen silence / chosen inaction as a first-class receipt.";
+const ROLE = "chosen silence / chosen inaction receipt lattice";
+const AUTHOR = "Aziel Eliab";
+const SPEC = "PL-WP-0.1";
+const ABSENT = "ABSENT";
+const ACTOR = "operator";
+const HOST = "https://peacelock-download-tracker.vibelock.workers.dev";
+const SKILL = `---
+name: PeaceLock
+description: Use when opening, sealing, breaking, or verifying a chosen-silence / chosen-inaction receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Hosted API is stateless. Hosted /v1 via this Worker or aziel-runtime. Author Aziel Eliab.
+---
+
+# PeaceLock
+
+Chosen silence / chosen inaction as a first-class receipt.
+
+Author: **Aziel Eliab**.
+
+Use when recording that an operator chose SILENCE, INACTION, or BOTH
+for a window. No transcript of unspoken words. No counterfactual act.
+No inferred motive. HARD_DUTY refuses open and seal and writes nothing.
+Hosted API is stateless and does not store ledgers.
+
+Always send \`User-Agent: Mozilla/5.0\`. Cloudflare Workers may 403 an empty agent.
+
+## Endpoints (this Worker)
+
+Host: \`https://peacelock-download-tracker.vibelock.workers.dev\`
+
+| Method | Path | What |
+|--------|------|------|
+| GET | \`/v1/health\` | Liveness. Does not increment downloads. |
+| GET | \`/v1/skill\` | This markdown. Does not increment downloads. |
+| GET | \`/v1/example\` | Sample open payload. Does not increment downloads. |
+| GET | \`/v1/doctor\` | Hosted self-check (no writes). Does not increment downloads. |
+| POST | \`/v1/open\` | Open a quiet window. HARD_DUTY refused. Client may send ledger. |
+| POST | \`/v1/seal\` | Seal OPEN → SEALED. HARD_DUTY refused. |
+| POST | \`/v1/break\` | Append BROKEN. Original seal stays. |
+| POST | \`/v1/show\` | Return the client-held ledger (filtered by pl_id). |
+| POST | \`/v1/verify\` | Walk hashes and prev links. Not stored. |
+| POST | \`/v1/lattice\` | Verify receipt links + state machine. |
+| POST | \`/v1/upload\` | Attach evidence envelope (file hash + timestamp + date stamp). |
+
+OpenAPI: \`https://peacelock-download-tracker.vibelock.workers.dev/openapi.json\`
+
+Catalog OpenAPI: \`https://aziel-runtime.vibelock.workers.dev/openapi.json\`
+
+MCP: \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`
+
+Catalog aliases under \`/p/peacelock/…\` when listed.
+
+TemporalLock (timeslate lattice): \`https://temporallock-download-tracker.vibelock.workers.dev/\`
+
+ShadowLock: \`https://shadowlock-download-tracker.vibelock.workers.dev/\`
+
+DecisionGATE: \`https://decisiongate-download-tracker.vibelock.workers.dev/\`
+
+FragGate kernel: \`https://github.com/AzielEliab/fraggate\`
+
+## How to call (Mozilla/5.0)
+
+\`\`\`bash
+curl -s -A 'Mozilla/5.0' https://peacelock-download-tracker.vibelock.workers.dev/v1/health
+curl -s -A 'Mozilla/5.0' -X POST https://peacelock-download-tracker.vibelock.workers.dev/v1/open \\
+  -H 'content-type: application/json' \\
+  -d '{"mode":"SILENCE","channel":"email","act_class":"reply"}'
+curl -s -A 'Mozilla/5.0' -X POST https://peacelock-download-tracker.vibelock.workers.dev/v1/verify \\
+  -H 'content-type: application/json' \\
+  -d '{"ledger":[]}'
+curl -s -A 'Mozilla/5.0' https://peacelock-download-tracker.vibelock.workers.dev/v1/skill
+\`\`\`
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): \`POST\` the catalog MCP endpoint.
+
+## Local (after one-click install)
+
+\`\`\`bash
+curl -fsSL https://peacelock-download-tracker.vibelock.workers.dev/install.sh | bash
+peacelock ui
+peacelock doctor
+\`\`\`
+
+Then open http://127.0.0.1:8768 (this computer only).
+
+## Honest banner
+
+THIS IS: chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1). THIS IS NOT: a gag-order kit, a wiretap, or third-party binding. HARD_DUTY cannot be bypassed. The Worker does not store ledgers. Author Aziel Eliab.
+
+Cite the GitHub repository and this Worker. No Zenodo DOI is invented here; a software deposit is still needed.
+
+Apache-2.0 (or the repo LICENSE). Forks are welcome and always allowed.
+
+## Catalog + local UI
+
+Author: **Aziel Eliab**. Honest scope: quiet-window receipts, not transcripts.
+
+- Product homepage (workspace + counted download): https://peacelock-download-tracker.vibelock.workers.dev/
+- Catalog product (when listed): https://aziel-runtime.vibelock.workers.dev/p/peacelock/
+- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
+- Catalog MCP: \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`
+- This Worker skill: \`GET https://peacelock-download-tracker.vibelock.workers.dev/v1/skill\`
+- This Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
+- Sample payload: \`GET https://peacelock-download-tracker.vibelock.workers.dev/v1/example\`
+
+Local UI: **Import JSONL file** (\`type=file\`) and **Export JSONL**. Upload hashes file bytes and stamps timestamp + date. Then \`peacelock doctor\`.
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients: \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`.
+
+Counted download (gzip HTTP 200, no 302): https://peacelock-download-tracker.vibelock.workers.dev/download?asset=peacelock-0.1.0.tar.gz
+GitHub: https://github.com/AzielEliab/peacelock
+`;
+const GENESIS_PREV_HASH = "0".repeat(64);
+const HASH_FIELDS = [
+  "act_class", "actor", "break_reason", "broken_at", "channel", "counterfactual_act",
+  "date_stamp", "duty_check", "event_kind", "evidence_kind", "file_name", "file_sha256",
+  "inferred_motive", "mode", "note", "opened_at", "pl_id", "prev_hash", "sealed_at",
+  "spec", "state", "timestamp", "transcript", "window_end", "window_start",
+];
+const MODES = ["SILENCE", "INACTION", "BOTH"];
+const STATES = ["OPEN", "SEALED", "BROKEN"];
+const ACT_CLASSES = ["reply", "file", "post", "call", "attend", "sign", "pay", "transfer", "delete", "other"];
+const BREAK_REASONS = ["speech_occurred", "act_occurred", "operator_void", "duty_conflict"];
+const FORBIDDEN = ["words", "draft", "paraphrase", "unspoken", "why", "motive", "transcript_text", "said", "would_have", "unspoken_words", "counterfactual", "inferred_why"];
+
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+}
+
+function json(body, status = 200) {
+  return new Response(JSON.stringify(body, null, 2), {
+    status,
+    headers: { "Content-Type": "application/json; charset=utf-8", ...corsHeaders() },
+  });
+}
+
+class ReceiptError extends Error { constructor(msg) { super(msg); this.name = "ReceiptError"; } }
+class LedgerError extends Error { constructor(msg) { super(msg); this.name = "LedgerError"; } }
+class HardDutyError extends Error { constructor(msg) { super(msg); this.name = "HardDutyError"; } }
+class InvariantError extends Error { constructor(msg) { super(msg); this.name = "InvariantError"; } }
+
+function utcNow() {
+  return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+function utcDate(ts) {
+  const src = ts || utcNow();
+  return src.slice(0, 10);
+}
+
+function requireStr(name, value) {
+  if (typeof value !== "string") throw new ReceiptError(`${name} must be a string`);
+  return value;
+}
+
+function assertNoLeakage(data) {
+  for (const key of FORBIDDEN) {
+    if (Object.prototype.hasOwnProperty.call(data || {}, key)) {
+      throw new InvariantError(`I1–I3: forbidden keys ${key}`);
+    }
+  }
+  for (const key of ["transcript", "counterfactual_act", "inferred_motive"]) {
+    const val = data && data[key];
+    if (val != null && val !== "" && val !== ABSENT) {
+      throw new InvariantError(`I1–I3: ${key} must be ABSENT`);
+    }
+  }
+  if (data && data.actor && data.actor !== ACTOR) {
+    throw new InvariantError("I4: actor must be operator");
+  }
+}
+
+function refuseHardDuty(duty, action) {
+  if (duty === "HARD_DUTY") {
+    throw new HardDutyError(`I6: HARD_DUTY refuses ${action}; write nothing. PeaceLock is not a gag-order kit and cannot bypass a hard duty.`);
+  }
+}
+
+function validateNote(note) {
+  const text = note == null ? "" : String(note);
+  if (text.length > 140) throw new InvariantError("I3: note must be ≤140 characters");
+  const lowered = text.toLowerCase();
+  if (lowered.startsWith("because ") || lowered.startsWith("why ") || ` ${lowered}`.includes(" why:")) {
+    throw new InvariantError("I3: note must not infer motive (no why)");
+  }
+  return text;
+}
+
+function parseIso(ts) {
+  if (typeof ts !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(ts)) {
+    throw new ReceiptError("timestamp must be UTC ISO-8601 with trailing Z (second precision)");
+  }
+  return Date.parse(ts);
+}
+
+function openClockOrLater(windowStart, openedAt) {
+  if (!windowStart) return openedAt;
+  if (parseIso(windowStart) < parseIso(openedAt)) {
+    throw new InvariantError("I5: no backdated quiet — window_start must be open clock or later");
+  }
+  return windowStart;
+}
+
+function extendForwardOnly(previousEnd, windowEnd, windowStart) {
+  if (!windowEnd) return previousEnd || null;
+  if (parseIso(windowEnd) < parseIso(windowStart)) {
+    throw new InvariantError("I5: window_end must be on or after window_start");
+  }
+  if (previousEnd && parseIso(windowEnd) < parseIso(previousEnd)) {
+    throw new InvariantError("I5: extend forward only — window_end cannot move backward");
+  }
+  return windowEnd;
+}
+
+function newPlId() {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  return "pl_" + [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function canonicalObject(record) {
+  const payload = {};
+  for (const key of HASH_FIELDS) payload[key] = record[key] == null ? null : record[key];
+  payload.spec = SPEC;
+  payload.transcript = ABSENT;
+  payload.counterfactual_act = ABSENT;
+  payload.inferred_motive = ABSENT;
+  payload.actor = ACTOR;
+  return payload;
+}
+
+function sortedJsonBytes(payload) {
+  const keys = Object.keys(payload).sort();
+  const raw = "{" + keys.map((k) => JSON.stringify(k) + ":" + JSON.stringify(payload[k])).join(",") + "}";
+  return new TextEncoder().encode(raw);
+}
+
+async function sha256HexBytes(bytes) {
+  const buf = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function digest(record) {
+  return sha256HexBytes(sortedJsonBytes(canonicalObject(record)));
+}
+
+function closed(name, value, allowed) {
+  const text = requireStr(name, value);
+  if (!allowed.includes(text)) throw new ReceiptError(`${name} must be one of ${allowed.join(",")}`);
+  return text;
+}
+
+async function createReceipt(fields) {
+  assertNoLeakage(fields);
+  const payload = {
+    spec: SPEC,
+    pl_id: fields.pl_id,
+    mode: fields.mode == null ? null : fields.mode,
+    state: fields.state == null ? null : fields.state,
+    window_start: fields.window_start || null,
+    window_end: fields.window_end || null,
+    channel: fields.channel == null ? null : fields.channel,
+    act_class: fields.act_class == null ? null : fields.act_class,
+    duty_check: fields.duty_check || "NONE",
+    actor: ACTOR,
+    note: validateNote(fields.note),
+    prev_hash: fields.prev_hash || GENESIS_PREV_HASH,
+    opened_at: fields.opened_at || null,
+    sealed_at: fields.sealed_at || null,
+    broken_at: fields.broken_at || null,
+    break_reason: fields.break_reason || null,
+    transcript: ABSENT,
+    counterfactual_act: ABSENT,
+    inferred_motive: ABSENT,
+    event_kind: fields.event_kind || "QUIET",
+    file_sha256: fields.file_sha256 || null,
+    file_name: fields.file_name || null,
+    timestamp: fields.timestamp || null,
+    date_stamp: fields.date_stamp || null,
+    evidence_kind: fields.evidence_kind || null,
+  };
+  if (payload.event_kind === "QUIET") {
+    payload.mode = closed("mode", payload.mode, MODES);
+    payload.state = closed("state", payload.state, STATES);
+    payload.act_class = closed("act_class", payload.act_class, ACT_CLASSES);
+    payload.channel = requireStr("channel", payload.channel || "");
+    if (!payload.channel.trim()) throw new ReceiptError("channel must be a non-empty string");
+  } else {
+    if (!payload.file_sha256 || !payload.file_name) throw new LedgerError("upload envelope requires file hash and basename");
+    if (String(payload.file_name).includes("/") || String(payload.file_name).includes("\\")) {
+      throw new ReceiptError("file_name must be a basename (no path)");
+    }
+    payload.timestamp = payload.timestamp || utcNow();
+    payload.date_stamp = payload.date_stamp || utcDate(payload.timestamp);
+    payload.evidence_kind = payload.evidence_kind || "operator_declared";
+  }
+  payload.receipt_hash = await digest(payload);
+  return payload;
+}
+
+function parseLedger(body) {
+  if (body == null) return [];
+  let raw = body;
+  if (typeof body === "string") {
+    const text = body.trim();
+    if (!text) return [];
+    if (text.startsWith("[")) raw = JSON.parse(text);
+    else {
+      const rows = [];
+      for (const line of text.split("\n")) {
+        const t = line.trim();
+        if (!t) continue;
+        rows.push(JSON.parse(t));
+      }
+      return rows;
+    }
+  }
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === "object") {
+    if (Array.isArray(raw.ledger)) return raw.ledger;
+    if (Array.isArray(raw.chain)) return raw.chain;
+    if (Array.isArray(raw.receipts)) return raw.receipts;
+  }
+  return [];
+}
+
+function tipHash(ledger) {
+  return ledger.length ? ledger[ledger.length - 1].receipt_hash : GENESIS_PREV_HASH;
+}
+
+function latestQuiet(ledger, plId, state) {
+  let found = null;
+  for (const rec of ledger) {
+    if (rec.event_kind !== "QUIET") continue;
+    if (rec.pl_id !== plId) continue;
+    if (state && rec.state !== state) continue;
+    found = rec;
+  }
+  return found;
+}
+
+async function recomputedHash(rec) {
+  const copy = { ...rec };
+  delete copy.receipt_hash;
+  return digest(copy);
+}
+
+async function verify(ledger) {
+  const errors = [];
+  const n = ledger.length;
+  const first = n ? ledger[0].receipt_hash : null;
+  const last = n ? ledger[n - 1].receipt_hash : null;
+  for (let i = 0; i < n; i++) {
+    const rec = ledger[i];
+    const expected = await recomputedHash(rec);
+    if (rec.receipt_hash !== expected) {
+      errors.push(`index ${i}: stored receipt_hash ${rec.receipt_hash} != recomputed ${expected}`);
+    }
+    if (rec.transcript !== ABSENT || rec.counterfactual_act !== ABSENT || rec.inferred_motive !== ABSENT) {
+      errors.push(`index ${i}: I1–I3 leakage`);
+    }
+    if (i === 0) {
+      if (rec.prev_hash !== GENESIS_PREV_HASH) errors.push(`index 0: prev_hash != GENESIS`);
+      continue;
+    }
+    if (rec.prev_hash !== ledger[i - 1].receipt_hash) {
+      errors.push(`index ${i}: prev_hash != previous.receipt_hash`);
+    }
+  }
+  return { ok: errors.length === 0, length: n, first_hash: first, last_hash: last, errors };
+}
+
+async function verifyLattice(ledger, receiptErrors) {
+  const errors = Array.isArray(receiptErrors) ? [...receiptErrors] : [];
+  let quiet = 0;
+  let envelopes = 0;
+  const lastState = {};
+  for (let i = 0; i < ledger.length; i++) {
+    const rec = ledger[i];
+    if (rec.event_kind === "UPLOAD_ENVELOPE") {
+      envelopes += 1;
+      if (!rec.timestamp || !rec.date_stamp || !rec.file_sha256) {
+        errors.push(`index ${i}: upload envelope missing timestamp/date stamp/file hash`);
+      }
+      continue;
+    }
+    quiet += 1;
+    if (rec.state === "BROKEN" && lastState[rec.pl_id] !== "SEALED") {
+      errors.push(`index ${i}: I7/I8 break without SEALED`);
+    }
+    if (rec.state) lastState[rec.pl_id] = rec.state;
+  }
+  return {
+    ok: errors.length === 0,
+    length: ledger.length,
+    quiet,
+    envelopes,
+    first_hash: ledger.length ? ledger[0].receipt_hash : null,
+    last_hash: ledger.length ? ledger[ledger.length - 1].receipt_hash : null,
+    errors,
+    role: ROLE,
+    note: "THIS IS: chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1). THIS IS NOT: a gag-order kit, a wiretap, or third-party binding. HARD_DUTY cannot be bypassed. Author Aziel Eliab.",
+  };
+}
+
+async function openWindow(body) {
+  assertNoLeakage(body);
+  const duty = body.duty_check || "NONE";
+  refuseHardDuty(duty, "open");
+  const ledger = parseLedger(body);
+  const openedAt = body.opened_at || utcNow();
+  const start = openClockOrLater(body.window_start || null, openedAt);
+  const end = extendForwardOnly(null, body.window_end || null, start);
+  const rec = await createReceipt({
+    event_kind: "QUIET",
+    pl_id: body.pl_id || newPlId(),
+    mode: body.mode,
+    state: "OPEN",
+    window_start: start,
+    window_end: end,
+    channel: body.channel,
+    act_class: body.act_class,
+    duty_check: duty,
+    note: body.note || "",
+    prev_hash: tipHash(ledger),
+    opened_at: openedAt,
+  });
+  return wrap("opened", rec, [...ledger, rec]);
+}
+
+async function sealWindow(body) {
+  assertNoLeakage(body);
+  const ledger = parseLedger(body);
+  const current = latestQuiet(ledger, body.pl_id);
+  if (!current || current.state !== "OPEN") throw new LedgerError(`no OPEN window for ${body.pl_id}; open first`);
+  const check = body.duty_check || current.duty_check;
+  refuseHardDuty(check, "seal");
+  const sealedAt = body.sealed_at || utcNow();
+  const start = current.window_start || current.opened_at || sealedAt;
+  let proposedEnd = body.window_end;
+  if (!proposedEnd) proposedEnd = sealedAt >= start ? sealedAt : start;
+  const end = extendForwardOnly(current.window_end, proposedEnd, start);
+  const rec = await createReceipt({
+    event_kind: "QUIET",
+    pl_id: current.pl_id,
+    mode: current.mode,
+    state: "SEALED",
+    window_start: current.window_start,
+    window_end: end,
+    channel: current.channel,
+    act_class: current.act_class,
+    duty_check: check,
+    note: body.note || current.note,
+    prev_hash: tipHash(ledger),
+    opened_at: current.opened_at,
+    sealed_at: sealedAt,
+  });
+  return wrap("sealed", rec, [...ledger, rec]);
+}
+
+async function breakWindow(body) {
+  const ledger = parseLedger(body);
+  const current = latestQuiet(ledger, body.pl_id);
+  if (!current) throw new LedgerError(`no quiet window for ${body.pl_id}`);
+  if (current.state === "OPEN") throw new LedgerError("I7: break requires SEALED (OPEN → SEALED → optional BROKEN)");
+  if (current.state === "BROKEN") throw new LedgerError(`${body.pl_id} is already BROKEN; original seal stays`);
+  if (!BREAK_REASONS.includes(body.reason)) throw new ReceiptError("break_reason closed set");
+  const rec = await createReceipt({
+    event_kind: "QUIET",
+    pl_id: current.pl_id,
+    mode: current.mode,
+    state: "BROKEN",
+    window_start: current.window_start,
+    window_end: current.window_end,
+    channel: current.channel,
+    act_class: current.act_class,
+    duty_check: current.duty_check,
+    note: body.note || current.note,
+    prev_hash: tipHash(ledger),
+    opened_at: current.opened_at,
+    sealed_at: current.sealed_at,
+    broken_at: body.broken_at || utcNow(),
+    break_reason: body.reason,
+  });
+  return wrap("broken", rec, [...ledger, rec]);
+}
+
+async function uploadEnvelope(body) {
+  assertNoLeakage(body);
+  const ledger = parseLedger(body);
+  let plId = body.pl_id;
+  if (!plId) {
+    for (let i = ledger.length - 1; i >= 0; i--) {
+      if (ledger[i].event_kind === "QUIET") { plId = ledger[i].pl_id; break; }
+    }
+    if (!plId) plId = newPlId();
+  }
+  const rec = await createReceipt({
+    event_kind: "UPLOAD_ENVELOPE",
+    pl_id: plId,
+    duty_check: "NONE",
+    note: body.note || "",
+    prev_hash: tipHash(ledger),
+    file_sha256: body.file_sha256 || body.sha256,
+    file_name: body.file_name || body.file || "envelope.bin",
+    timestamp: body.timestamp || utcNow(),
+    date_stamp: body.date_stamp || null,
+    evidence_kind: "operator_declared",
+  });
+  return wrap("envelope", rec, [...ledger, rec]);
+}
+
+function wrap(action, rec, ledger) {
+  return {
+    product: PRODUCT,
+    version: VERSION,
+    motto: MOTTO,
+    role: ROLE,
+    author: AUTHOR,
+    spec: SPEC,
+    action,
+    receipt: rec,
+    ledger,
+    chain: ledger,
+  };
+}
+
+function openapiSpec() {
+  const ledgerSchema = { oneOf: [{ type: "array", items: { type: "object" } }, { type: "string" }] };
+  return {
+    openapi: "3.1.0",
+    info: {
+      title: "PeaceLock runtime",
+      version: VERSION,
+      description: "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1). Client sends the ledger JSON (stateless). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Author " + AUTHOR + ".",
+    },
+    servers: [{ url: HOST }],
+    paths: {
+      "/v1/skill": { get: { operationId: "peacelock_skill", summary: "Return skill markdown. Does not increment download KV.", responses: { "200": { description: "markdown" } } } },
+      "/v1/health": { get: { operationId: "health", summary: "Liveness", responses: { "200": { description: "ok" } } } },
+      "/v1/doctor": { get: { operationId: "doctor", summary: "Hosted self-check. No writes.", responses: { "200": { description: "ok" } } } },
+      "/v1/open": { post: { operationId: "open", summary: "Open a quiet window. HARD_DUTY refused.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["mode", "channel", "act_class"], properties: { mode: { type: "string" }, channel: { type: "string" }, act_class: { type: "string" }, duty_check: { type: "string" }, note: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "opened" } } } },
+      "/v1/seal": { post: { operationId: "seal", summary: "Seal OPEN → SEALED. HARD_DUTY refused.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["pl_id"], properties: { pl_id: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "sealed" } } } },
+      "/v1/break": { post: { operationId: "break", summary: "Append BROKEN. Original seal stays.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["pl_id", "reason"], properties: { pl_id: { type: "string" }, reason: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "broken" } } } },
+      "/v1/show": { post: { operationId: "show", summary: "Return the client-held ledger.", requestBody: { content: { "application/json": { schema: { type: "object" } } } }, responses: { "200": { description: "show" } } } },
+      "/v1/verify": { post: { operationId: "verify", summary: "Walk hashes and links.", requestBody: { content: { "application/json": { schema: { type: "object", properties: { ledger: ledgerSchema } } } } }, responses: { "200": { description: "verify" } } } },
+      "/v1/lattice": { post: { operationId: "lattice", summary: "Verify receipt links + state machine.", requestBody: { content: { "application/json": { schema: { type: "object" } } } }, responses: { "200": { description: "lattice" } } } },
+      "/v1/upload": { post: { operationId: "upload", summary: "Attach evidence envelope (file hash + timestamp + date stamp). No transcript.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { file_sha256: { type: "string" }, file_name: { type: "string" }, timestamp: { type: "string" }, date_stamp: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "envelope" } } } },
+      "/v1/example": { get: { operationId: "example", summary: "Sample open payload.", responses: { "200": { description: "example" } } } },
+    },
+  };
+}
+
+function aiHtml() {
+  return `<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PeaceLock — Aziel Eliab · AI runtime</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font: 16px/1.45 system-ui, sans-serif; max-width: 42rem; margin: 3rem auto; padding: 0 1.25rem 3rem; background: #0b0b0b; color: #e8e0d0; }
+  code { background: #151922; padding: .15rem .4rem; border-radius: 4px; }
+  a { color: #e6d19a; }
+  .motto { color: #c9a227; font-style: italic; }
+  .brandrow{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+  .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 auto;box-shadow:0 0 0 1px #d4af3733}
+  .stamp{margin:0;color:#c9a227;font-size:.88rem}
+</style>
+<body>
+  <div class="brandrow">
+    <img class="brandmark" src="/sigil.png" width="40" height="40" alt="Everblooming sigil — Aziel Eliab" decoding="async">
+    <p class="stamp">Everblooming sigil · Aziel Eliab</p>
+  </div>
+  <h1>PeaceLock live API</h1>
+  <p class="motto">${MOTTO}</p>
+  <p>Chosen silence / chosen inaction as a first-class receipt. Stateless: send the ledger JSON in the body. Transcript is always ABSENT. HARD_DUTY cannot be bypassed. Author ${AUTHOR}.</p>
+  <h2>Use with AI assistants</h2>
+  <p>Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Author ${AUTHOR} only.</p>
+  <h2>OpenAPI import</h2>
+  <p>Paste this OpenAPI URL into GPT Actions, custom HTTP tools, Grok custom tools, or any other OpenAPI-capable assistant:</p>
+  <p><code>${HOST}/openapi.json</code></p>
+  <p>Custom tools can also point at <code>POST ${HOST}/v1/open</code>, <code>/v1/seal</code>, <code>/v1/break</code>, <code>/v1/verify</code>, <code>/v1/upload</code>.</p>
+  <h2>MCP catalog</h2>
+  <p>MCP clients (Cursor, Glama, Claude, and others) use the shared catalog (ships separately): <code>https://aziel-runtime.vibelock.workers.dev/mcp</code>.</p>
+  <p><a href="/openapi.json">openapi.json</a> · <a href="/v1/health">health</a> · <a href="/">PeaceLock software</a> · <a href="/cite.json">cite.json</a></p>
+</body>
+</html>`;
+}
+
+export async function handleRuntimeApi(request, url) {
+  const path = url.pathname;
+  const isApi = path === "/v1" || path.startsWith("/v1/") || path === "/openapi.json" || path === "/ai";
+  if (!isApi) return null;
+  try {
+    if (path === "/v1/health" && request.method === "GET") {
+      return json({ ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, role: ROLE, motto: MOTTO, spec: SPEC, note: "Hosted /v1 does not store ledgers. Transcript is always ABSENT." });
+    }
+    if (path === "/v1/skill" && request.method === "GET") {
+      return new Response(SKILL, { status: 200, headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "private, no-store", ...corsHeaders() } });
+    }
+    if (path === "/openapi.json" && request.method === "GET") return json(openapiSpec());
+    if (path === "/ai" && request.method === "GET") {
+      return new Response(aiHtml(), { headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders() } });
+    }
+    if (path === "/v1/doctor" && request.method === "GET") {
+      return json({ ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, identity: "Aziel Eliab only", hard_duty: "refuse open and seal", transcript: ABSENT, network: false });
+    }
+    if (path === "/v1/example" && request.method === "GET") {
+      return json({ mode: "SILENCE", channel: "email", act_class: "reply", duty_check: "NONE", note: "window only", author: AUTHOR, spec: SPEC });
+    }
+    async function readBody() {
+      try { return await request.json(); } catch { return {}; }
+    }
+    if (path === "/v1/open" && request.method === "POST") return json(await openWindow(await readBody()));
+    if (path === "/v1/seal" && request.method === "POST") return json(await sealWindow(await readBody()));
+    if (path === "/v1/break" && request.method === "POST") return json(await breakWindow(await readBody()));
+    if (path === "/v1/upload" && request.method === "POST") return json(await uploadEnvelope(await readBody()));
+    if (path === "/v1/show" && request.method === "POST") {
+      const body = await readBody();
+      let ledger = parseLedger(body);
+      if (body.pl_id) ledger = ledger.filter((r) => r.pl_id === body.pl_id);
+      return json({ product: PRODUCT, version: VERSION, author: AUTHOR, action: "show", ledger, length: ledger.length });
+    }
+    if (path === "/v1/verify" && request.method === "POST") {
+      const ledger = parseLedger(await readBody());
+      return json({ product: PRODUCT, version: VERSION, motto: MOTTO, role: ROLE, author: AUTHOR, ...(await verify(ledger)) });
+    }
+    if (path === "/v1/lattice" && request.method === "POST") {
+      const ledger = parseLedger(await readBody());
+      const rec = await verify(ledger);
+      return json({ product: PRODUCT, version: VERSION, author: AUTHOR, ...(await verifyLattice(ledger, rec.errors)) });
+    }
+    return json({ error: "not found" }, 404);
+  } catch (err) {
+    const status = err instanceof HardDutyError ? 409 : 400;
+    return json({ error: String(err.message || err), motto: MOTTO, ok: false }, status);
+  }
+}

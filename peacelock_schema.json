@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AzielEliab/peacelock/peacelock_schema.json",
+  "title": "PeaceLock receipt (PL-WP-0.1)",
+  "description": "Chosen silence / chosen inaction receipt or operator-declared upload envelope. Author Aziel Eliab only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "spec",
+    "pl_id",
+    "duty_check",
+    "actor",
+    "note",
+    "prev_hash",
+    "transcript",
+    "counterfactual_act",
+    "inferred_motive",
+    "receipt_hash",
+    "event_kind"
+  ],
+  "properties": {
+    "spec": { "const": "PL-WP-0.1" },
+    "pl_id": { "type": "string", "pattern": "^pl_[0-9a-f]{16}$" },
+    "mode": { "type": ["string", "null"], "enum": ["SILENCE", "INACTION", "BOTH", null] },
+    "state": { "type": ["string", "null"], "enum": ["OPEN", "SEALED", "BROKEN", null] },
+    "window_start": { "type": ["string", "null"] },
+    "window_end": { "type": ["string", "null"] },
+    "channel": { "type": ["string", "null"] },
+    "act_class": {
+      "type": ["string", "null"],
+      "enum": ["reply", "file", "post", "call", "attend", "sign", "pay", "transfer", "delete", "other", null]
+    },
+    "duty_check": { "enum": ["NONE", "ADVISORY", "HARD_DUTY"] },
+    "actor": { "const": "operator" },
+    "note": { "type": "string", "maxLength": 140 },
+    "prev_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "opened_at": { "type": ["string", "null"] },
+    "sealed_at": { "type": ["string", "null"] },
+    "broken_at": { "type": ["string", "null"] },
+    "break_reason": {
+      "type": ["string", "null"],
+      "enum": ["speech_occurred", "act_occurred", "operator_void", "duty_conflict", null]
+    },
+    "transcript": { "const": "ABSENT" },
+    "counterfactual_act": { "const": "ABSENT" },
+    "inferred_motive": { "const": "ABSENT" },
+    "receipt_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "event_kind": { "enum": ["QUIET", "UPLOAD_ENVELOPE"] },
+    "file_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "file_name": { "type": ["string", "null"] },
+    "timestamp": { "type": ["string", "null"] },
+    "date_stamp": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "evidence_kind": { "type": ["string", "null"] }
+  }
+}

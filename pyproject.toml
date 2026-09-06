@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peacelock"
+version = "0.1.0"
+description = "Chosen silence / chosen inaction as a first-class receipt (PeaceLock PL-WP-0.1, Aziel Eliab). Not a gag-order kit. HARD_DUTY cannot be bypassed."
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [{name = "Aziel Eliab"}]
+requires-python = ">=3.10"
+keywords = [
+    "peacelock",
+    "silence",
+    "inaction",
+    "receipts",
+    "append-only",
+    "hash-chain",
+    "lattice",
+    "temporallock",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security :: Cryptography",
+    "Intended Audience :: Developers",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+peacelock = "peacelock.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/AzielEliab/peacelock"
+Download = "https://peacelock-download-tracker.vibelock.workers.dev/"
+Issues = "https://github.com/AzielEliab/peacelock/issues"
+
+[tool.setuptools.packages.find]
+include = ["peacelock*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
