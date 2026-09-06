@@ -47,6 +47,7 @@ The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
 - Direct tarball: [peacelock-0.1.0.tar.gz](https://peacelock-download-tracker.vibelock.workers.dev/download?asset=peacelock-0.1.0.tar.gz)
 - One-click install: [https://peacelock-download-tracker.vibelock.workers.dev/install.sh](https://peacelock-download-tracker.vibelock.workers.dev/install.sh)
 - Skill: [https://peacelock-download-tracker.vibelock.workers.dev/v1/skill](https://peacelock-download-tracker.vibelock.workers.dev/v1/skill)
+- Worker MCP: [https://peacelock-download-tracker.vibelock.workers.dev/mcp](https://peacelock-download-tracker.vibelock.workers.dev/mcp) — GET docs / POST JSON-RPC (health/skill/open/seal/verify)
 - OpenAPI: [https://peacelock-download-tracker.vibelock.workers.dev/openapi.json](https://peacelock-download-tracker.vibelock.workers.dev/openapi.json)
 - GitHub: [https://github.com/AzielEliab/peacelock](https://github.com/AzielEliab/peacelock)
 - Cite: [cite.json](https://peacelock-download-tracker.vibelock.workers.dev/cite.json) — Eliab, Aziel. (2026). PeaceLock 0.1.0 [Software]. Apache-2.0. No Zenodo DOI is invented here; a software deposit is still needed.
@@ -157,13 +158,14 @@ Runtime is stdlib only (`hashlib`, `json`). No extra crypto packages.
 
 ## Use with AI assistants
 
-Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Public identity: Aziel Eliab only.
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): `POST https://peacelock-download-tracker.vibelock.workers.dev/mcp` or catalog `POST https://aziel-runtime.vibelock.workers.dev/mcp`. Public identity: Aziel Eliab only.
 
 - Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
+- Worker MCP: `POST https://peacelock-download-tracker.vibelock.workers.dev/mcp`
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
-- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp` (FragGate slug `peacelock`)
 
-Agents use OpenAPI/MCP via aziel-runtime. Humans use the complete Worker UI (open/seal/break/show/verify, upload, import/export, doctor). Dual surface: do not gut the human UI.
+Agents use this Worker `/mcp` (thin doubles of health/skill/open/seal/verify) or OpenAPI/MCP via aziel-runtime. Humans use the complete Worker UI (open/seal/break/show/verify, upload, import/export, doctor). Dual surface: do not gut the human UI.
 
 Always send `User-Agent: Mozilla/5.0`.
 
@@ -184,6 +186,7 @@ Author: **Aziel Eliab**. Honest scope: quiet-window receipts, not transcripts.
 - Catalog product (when listed): https://aziel-runtime.vibelock.workers.dev/p/peacelock/
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
 - Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+- This Worker MCP (dual surface): `POST https://peacelock-download-tracker.vibelock.workers.dev/mcp`
 - This Worker skill: `GET https://peacelock-download-tracker.vibelock.workers.dev/v1/skill`
 - This Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
 

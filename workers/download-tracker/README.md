@@ -11,6 +11,8 @@ GET `/download` increments **downloads**.
 `/v1` never increments DOWNLOADS KV.
 GET `/install.sh` one-click install (does not increment; script curls `/download`).
 GET `/v1/skill` returns skill markdown (`text/markdown`). Does not increment views or downloads.
+GET `/mcp` returns dual-surface MCP docs + FragGate pointer (`slug=peacelock`). Does not increment.
+POST `/mcp` is JSON-RPC MCP-over-HTTP (`initialize`, `tools/list`, `tools/call`) doubling health/skill/open/seal/verify.
 GET `/cite.json`, `/sitemap.xml`, `/robots.txt`, `/llms.txt` are SEO / cite surfaces. Do not increment downloads.
 
 Host: https://peacelock-download-tracker.vibelock.workers.dev

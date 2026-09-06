@@ -15,7 +15,7 @@ const ACTOR = "operator";
 const HOST = "https://peacelock-download-tracker.vibelock.workers.dev";
 const SKILL = `---
 name: PeaceLock
-description: Use when opening, sealing, breaking, or verifying a chosen-silence / chosen-inaction receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Hosted API is stateless. Hosted /v1 via this Worker or aziel-runtime. Author Aziel Eliab.
+description: Use when opening, sealing, breaking, or verifying a chosen-silence / chosen-inaction receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Hosted API is stateless. Dual surface: Worker /v1 + POST /mcp, or aziel-runtime FragGate slug peacelock. Author Aziel Eliab.
 ---
 
 # PeaceLock
@@ -48,12 +48,16 @@ Host: \`https://peacelock-download-tracker.vibelock.workers.dev\`
 | POST | \`/v1/verify\` | Walk hashes and prev links. Not stored. |
 | POST | \`/v1/lattice\` | Verify receipt links + state machine. |
 | POST | \`/v1/upload\` | Attach evidence envelope (file hash + timestamp + date stamp). |
+| GET | \`/mcp\` | Dual-surface MCP docs + FragGate pointer. Does not increment downloads. |
+| POST | \`/mcp\` | JSON-RPC MCP-over-HTTP. Thin doubles of health/skill/open/seal/verify (plus break/show/lattice/upload/doctor). |
 
 OpenAPI: \`https://peacelock-download-tracker.vibelock.workers.dev/openapi.json\`
 
 Catalog OpenAPI: \`https://aziel-runtime.vibelock.workers.dev/openapi.json\`
 
-MCP: \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`
+This Worker MCP: \`POST https://peacelock-download-tracker.vibelock.workers.dev/mcp\`
+
+Catalog MCP: \`POST https://aziel-runtime.vibelock.workers.dev/mcp\` (FragGate slug \`peacelock\`)
 
 Catalog aliases under \`/p/peacelock/…\` when listed.
 
@@ -78,7 +82,7 @@ curl -s -A 'Mozilla/5.0' -X POST https://peacelock-download-tracker.vibelock.wor
 curl -s -A 'Mozilla/5.0' https://peacelock-download-tracker.vibelock.workers.dev/v1/skill
 \`\`\`
 
-Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): \`POST\` the catalog MCP endpoint.
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import the catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients (Cursor, Glama, Claude, and others): \`POST\` this Worker \`/mcp\` (thin doubles of the human buttons) or the catalog MCP endpoint (FragGate slug peacelock).
 
 ## Local (after one-click install)
 
@@ -106,13 +110,14 @@ Author: **Aziel Eliab**. Honest scope: quiet-window receipts, not transcripts.
 - Catalog product (when listed): https://aziel-runtime.vibelock.workers.dev/p/peacelock/
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
 - Catalog MCP: \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`
+- This Worker MCP (dual surface): \`POST https://peacelock-download-tracker.vibelock.workers.dev/mcp\`
 - This Worker skill: \`GET https://peacelock-download-tracker.vibelock.workers.dev/v1/skill\`
 - This Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
 - Sample payload: \`GET https://peacelock-download-tracker.vibelock.workers.dev/v1/example\`
 
 Local UI: **Import JSONL file** (\`type=file\`) and **Export JSONL**. Upload hashes file bytes and stamps timestamp + date. Then \`peacelock doctor\`.
 
-Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients: \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`.
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as a GPT Action, custom HTTP tool, or custom OpenAPI tool. MCP clients: \`POST https://peacelock-download-tracker.vibelock.workers.dev/mcp\` or catalog \`POST https://aziel-runtime.vibelock.workers.dev/mcp\`.
 
 Counted download (gzip HTTP 200, no 302): https://peacelock-download-tracker.vibelock.workers.dev/download?asset=peacelock-0.1.0.tar.gz
 GitHub: https://github.com/AzielEliab/peacelock
@@ -133,8 +138,8 @@ const FORBIDDEN = ["words", "draft", "paraphrase", "unspoken", "why", "motive", 
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent",
   };
 }
 
@@ -558,6 +563,10 @@ function openapiSpec() {
       "/v1/lattice": { post: { operationId: "lattice", summary: "Verify receipt links + state machine.", requestBody: { content: { "application/json": { schema: { type: "object" } } } }, responses: { "200": { description: "lattice" } } } },
       "/v1/upload": { post: { operationId: "upload", summary: "Attach evidence envelope (file hash + timestamp + date stamp). No transcript.", requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { file_sha256: { type: "string" }, file_name: { type: "string" }, timestamp: { type: "string" }, date_stamp: { type: "string" }, ledger: ledgerSchema } } } } }, responses: { "200": { description: "envelope" } } } },
       "/v1/example": { get: { operationId: "example", summary: "Sample open payload.", responses: { "200": { description: "example" } } } },
+      "/mcp": {
+        get: { operationId: "peacelock_mcp_docs", summary: "Dual-surface MCP docs + FragGate pointer (slug peacelock).", responses: { "200": { description: "docs" } } },
+        post: { operationId: "peacelock_mcp", summary: "JSON-RPC MCP-over-HTTP. Thin doubles of health/skill/open/seal/verify.", responses: { "200": { description: "rpc" } } },
+      },
     },
   };
 }
@@ -593,13 +602,233 @@ function aiHtml() {
   <p><code>${HOST}/openapi.json</code></p>
   <p>Custom tools can also point at <code>POST ${HOST}/v1/open</code>, <code>/v1/seal</code>, <code>/v1/break</code>, <code>/v1/verify</code>, <code>/v1/upload</code>.</p>
   <h2>MCP catalog</h2>
-  <p>MCP clients (Cursor, Glama, Claude, and others) use the shared catalog (ships separately): <code>https://aziel-runtime.vibelock.workers.dev/mcp</code>.</p>
-  <p><a href="/openapi.json">openapi.json</a> · <a href="/v1/health">health</a> · <a href="/">PeaceLock software</a> · <a href="/cite.json">cite.json</a></p>
+  <p>This Worker doubles the human buttons: <code>POST ${HOST}/mcp</code> (JSON-RPC <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code>). Canonical catalog MCP remains <code>https://aziel-runtime.vibelock.workers.dev/mcp</code> (FragGate slug <code>peacelock</code>).</p>
+  <p><a href="/openapi.json">openapi.json</a> · <a href="/mcp">/mcp</a> · <a href="/v1/health">health</a> · <a href="/">PeaceLock software</a> · <a href="/cite.json">cite.json</a></p>
 </body>
 </html>`;
 }
 
+const CATALOG = "https://aziel-runtime.vibelock.workers.dev";
+const FRAGGATE_CALL = CATALOG + "/v1/fraggate/call";
+const CATALOG_MCP = CATALOG + "/mcp";
+const MCP_OPS = ["health", "skill", "open", "seal", "verify", "break", "show", "lattice", "upload", "doctor", "example"];
+const MCP_TOOLS = MCP_OPS.map((op) => "peacelock_" + op);
+const MCP_REFUSED = [
+  "transcript", "transcribe", "motive", "counterfactual", "invent",
+  "waive-duty", "bypass-duty", "waive_duty", "bypass_duty",
+];
+
+function mcpDocs() {
+  return {
+    ok: true,
+    product: PRODUCT,
+    version: VERSION,
+    spec: SPEC,
+    door: "fraggate",
+    slug: "peacelock",
+    identity: "Aziel Eliab only",
+    author: AUTHOR,
+    transport: "JSON-RPC MCP-over-HTTP",
+    endpoint: "POST /mcp",
+    methods: ["initialize", "tools/list", "tools/call", "ping"],
+    auth: "none (public)",
+    this_worker_mcp: HOST + "/mcp",
+    catalog_mcp: CATALOG_MCP,
+    catalog_openapi: CATALOG + "/openapi.json",
+    worker_openapi: HOST + "/openapi.json",
+    agent_path: FRAGGATE_CALL,
+    body: { slug: "peacelock", op: "health", payload: {} },
+    ops: MCP_OPS,
+    tools: MCP_TOOLS,
+    note: "POST JSON-RPC here to double the human quiet-window buttons (health/skill/open/seal/verify). Canonical agent path is the catalog MCP on aziel-runtime (FragGate slug peacelock).",
+    kv_increment: false,
+    kernel: "https://github.com/AzielEliab/fraggate",
+  };
+}
+
+function mcpInitialize() {
+  return {
+    protocolVersion: "2025-03-26",
+    capabilities: { tools: { listChanged: false } },
+    serverInfo: { name: "peacelock", version: VERSION },
+    instructions:
+      "PeaceLock PL-WP-0.1 — chosen silence / chosen inaction as a first-class receipt. Dual surface: human Worker UI and this MCP share health/skill/open/seal/verify. Transcript always ABSENT. HARD_DUTY cannot be bypassed. Canonical catalog agent path is POST " +
+      CATALOG_MCP +
+      " or FragGate POST " +
+      FRAGGATE_CALL +
+      " {slug:peacelock,op,payload}. Author Aziel Eliab only.",
+  };
+}
+
+function mcpToolSchemas() {
+  const ledger = { oneOf: [{ type: "array", items: { type: "object" } }, { type: "string" }] };
+  return [
+    { name: "peacelock_health", description: "Liveness. Same as GET /v1/health. Does not increment downloads.", inputSchema: { type: "object", properties: {} } },
+    { name: "peacelock_skill", description: "Return PeaceLock skill markdown. Same as GET /v1/skill.", inputSchema: { type: "object", properties: {} } },
+    { name: "peacelock_open", description: "Open a quiet window. HARD_DUTY refused. Same as POST /v1/open.", inputSchema: { type: "object", properties: { mode: { type: "string" }, channel: { type: "string" }, act_class: { type: "string" }, duty_check: { type: "string" }, note: { type: "string" }, ledger }, required: ["mode", "channel", "act_class"] } },
+    { name: "peacelock_seal", description: "Seal OPEN → SEALED. HARD_DUTY refused. Same as POST /v1/seal.", inputSchema: { type: "object", properties: { pl_id: { type: "string" }, duty_check: { type: "string" }, note: { type: "string" }, ledger }, required: ["pl_id"] } },
+    { name: "peacelock_verify", description: "Walk hashes and prev links. Same as POST /v1/verify.", inputSchema: { type: "object", properties: { ledger } } },
+    { name: "peacelock_break", description: "Append BROKEN. Original seal stays. Same as POST /v1/break.", inputSchema: { type: "object", properties: { pl_id: { type: "string" }, reason: { type: "string" }, note: { type: "string" }, ledger }, required: ["pl_id", "reason"] } },
+    { name: "peacelock_show", description: "Return the client-held ledger. Same as POST /v1/show.", inputSchema: { type: "object", properties: { pl_id: { type: "string" }, ledger } } },
+    { name: "peacelock_lattice", description: "Verify receipt links + state machine. Same as POST /v1/lattice.", inputSchema: { type: "object", properties: { ledger } } },
+    { name: "peacelock_upload", description: "Attach evidence envelope (file hash + timestamp + date stamp). Same as POST /v1/upload.", inputSchema: { type: "object", properties: { file_sha256: { type: "string" }, file_name: { type: "string" }, timestamp: { type: "string" }, date_stamp: { type: "string" }, ledger } } },
+    { name: "peacelock_doctor", description: "Hosted self-check. No writes. Same as GET /v1/doctor.", inputSchema: { type: "object", properties: {} } },
+    { name: "peacelock_example", description: "Sample open payload. Same as GET /v1/example.", inputSchema: { type: "object", properties: {} } },
+  ];
+}
+
+function resolveMcpOp(name) {
+  if (typeof name !== "string" || !name) return null;
+  const raw = name.trim();
+  const stripped = raw.startsWith("peacelock_") ? raw.slice("peacelock_".length) : raw;
+  if (stripped === "upload_envelope") return "upload";
+  if (MCP_OPS.includes(stripped)) return stripped;
+  return null;
+}
+
+function refusedMcpOp(name) {
+  if (typeof name !== "string" || !name) return null;
+  const raw = name.trim();
+  const stripped = raw.startsWith("peacelock_") ? raw.slice("peacelock_".length) : raw;
+  return MCP_REFUSED.includes(stripped) ? stripped : null;
+}
+
+async function runMcpOp(op, body) {
+  const payload = body && typeof body === "object" ? body : {};
+  if (op === "health") {
+    return { ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, role: ROLE, motto: MOTTO, spec: SPEC, kv_increment: false, note: "Hosted /v1 and /mcp do not store ledgers. Transcript is always ABSENT." };
+  }
+  if (op === "skill") return { skill: SKILL };
+  if (op === "doctor") {
+    return { ok: true, product: PRODUCT, version: VERSION, author: AUTHOR, identity: "Aziel Eliab only", hard_duty: "refuse open and seal", transcript: ABSENT, network: false };
+  }
+  if (op === "example") {
+    return { mode: "SILENCE", channel: "email", act_class: "reply", duty_check: "NONE", note: "window only", author: AUTHOR, spec: SPEC };
+  }
+  if (op === "open") return openWindow(payload);
+  if (op === "seal") return sealWindow(payload);
+  if (op === "break") return breakWindow(payload);
+  if (op === "upload") return uploadEnvelope(payload);
+  if (op === "show") {
+    let ledger = parseLedger(payload);
+    if (payload.pl_id) ledger = ledger.filter((r) => r.pl_id === payload.pl_id);
+    return { product: PRODUCT, version: VERSION, author: AUTHOR, action: "show", ledger, length: ledger.length };
+  }
+  if (op === "verify") {
+    const ledger = parseLedger(payload);
+    return { product: PRODUCT, version: VERSION, motto: MOTTO, role: ROLE, author: AUTHOR, ...(await verify(ledger)) };
+  }
+  if (op === "lattice") {
+    const ledger = parseLedger(payload);
+    const rec = await verify(ledger);
+    return { product: PRODUCT, version: VERSION, author: AUTHOR, ...(await verifyLattice(ledger, rec.errors)) };
+  }
+  throw new ReceiptError("unknown op");
+}
+
+async function callMcpTool(name, args) {
+  const refused = refusedMcpOp(name);
+  if (refused) {
+    return {
+      isError: true,
+      content: [{
+        type: "text",
+        text: JSON.stringify({
+          ok: false,
+          error: "I1–I6 refuse: " + refused + " is not a PeaceLock op. Transcript, motive, and counterfactual stay ABSENT. HARD_DUTY cannot be bypassed.",
+          code: "PL-REFUSE",
+          door: "fraggate",
+          slug: "peacelock",
+        }, null, 2),
+      }],
+    };
+  }
+  const op = resolveMcpOp(name);
+  if (!op) {
+    return {
+      isError: true,
+      content: [{
+        type: "text",
+        text: JSON.stringify({
+          ok: false,
+          error: "Unknown MCP tool. Use peacelock_health, peacelock_skill, peacelock_open, peacelock_seal, peacelock_verify (plus break/show/lattice/upload/doctor). Canonical catalog MCP: " + CATALOG_MCP + " slug=peacelock.",
+          door: "fraggate",
+          slug: "peacelock",
+          agent_path: FRAGGATE_CALL,
+        }, null, 2),
+      }],
+    };
+  }
+  try {
+    if (op === "skill") {
+      return { content: [{ type: "text", text: SKILL }] };
+    }
+    const data = await runMcpOp(op, args);
+    return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+  } catch (err) {
+    return {
+      isError: true,
+      content: [{
+        type: "text",
+        text: JSON.stringify({ ok: false, error: String(err.message || err), motto: MOTTO }, null, 2),
+      }],
+    };
+  }
+}
+
+async function handleMcpJson(request) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, 400);
+  }
+  const id = body && Object.prototype.hasOwnProperty.call(body, "id") ? body.id : null;
+  const method = body && body.method;
+  const params = (body && body.params) || {};
+  if (method === "initialize") {
+    return json({ jsonrpc: "2.0", id, result: mcpInitialize() });
+  }
+  if (method === "notifications/initialized" || method === "initialized") {
+    return new Response(null, { status: 204, headers: corsHeaders() });
+  }
+  if (method === "ping") {
+    return json({ jsonrpc: "2.0", id, result: {} });
+  }
+  if (method === "tools/list") {
+    return json({ jsonrpc: "2.0", id, result: { tools: mcpToolSchemas() } });
+  }
+  if (method === "tools/call") {
+    const name = params.name;
+    const args = params.arguments && typeof params.arguments === "object" ? params.arguments : {};
+    return json({ jsonrpc: "2.0", id, result: await callMcpTool(name, args) });
+  }
+  return json({
+    jsonrpc: "2.0",
+    id,
+    error: { code: -32601, message: "Method not found. Use initialize, tools/list, tools/call." },
+  });
+}
+
+async function handleMcp(request) {
+  if (request.method === "GET" || request.method === "HEAD") {
+    if (request.method === "HEAD") return new Response(null, { status: 200, headers: corsHeaders() });
+    return json(mcpDocs());
+  }
+  if (request.method === "POST") return handleMcpJson(request);
+  return json({ error: "method not allowed", hint: "GET or POST /mcp" }, 405);
+}
+
 export async function handleRuntimeApi(request, url) {
+  const stripped = url.pathname.replace(/\/+$/, "") || "/";
+  if (stripped === "/mcp") {
+    try {
+      return await handleMcp(request);
+    } catch (err) {
+      const status = err instanceof HardDutyError ? 409 : 400;
+      return json({ error: String(err.message || err), motto: MOTTO, ok: false }, status);
+    }
+  }
   const path = url.pathname;
   const isApi = path === "/v1" || path.startsWith("/v1/") || path === "/openapi.json" || path === "/ai";
   if (!isApi) return null;

@@ -62,3 +62,9 @@ def test_upload_stamps_in_home() -> None:
     assert "date_stamp" in HOME
     assert "timestamp" in HOME
     assert "file" in HOME.lower()
+
+
+def test_home_and_seo_advertise_worker_mcp() -> None:
+    assert 'href="/mcp"' in HOME
+    assert "/mcp" in HOME
+    assert "catalog_mcp" in HOME or "aziel-runtime.vibelock.workers.dev" in HOME
