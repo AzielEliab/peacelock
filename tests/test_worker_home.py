@@ -58,6 +58,18 @@ def test_worker_serves_home_and_seo() -> None:
     assert "ASSETS.fetch" in INDEX or "env.ASSETS" in INDEX
 
 
+def test_count_returns_views_downloads_and_total() -> None:
+    """YELLOW audit: GET /count must not be {project, total} only."""
+    assert 'url.pathname === "/count"' in INDEX
+    assert "views: stats.views || 0" in INDEX
+    assert "downloads: stats.downloads || 0" in INDEX
+    assert "total: stats.total || 0" in INDEX
+    assert "json({ project: PROJECT, total: stats.total || 0 })" not in INDEX
+    # azhub convention: views from __views__, downloads from download keys, total = downloads
+    assert "function viewsKey()" in INDEX
+    assert "downloads: shown" in INDEX
+
+
 def test_upload_stamps_in_home() -> None:
     assert "date_stamp" in HOME
     assert "timestamp" in HOME

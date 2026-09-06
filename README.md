@@ -66,7 +66,7 @@ Open http://127.0.0.1:8768 (loopback only). No CDN, no telemetry.
 
 Direct tarball (also counted): [peacelock-0.1.0.tar.gz](https://peacelock-download-tracker.vibelock.workers.dev/download?asset=peacelock-0.1.0.tar.gz)
 
-- Live count JSON: [https://peacelock-download-tracker.vibelock.workers.dev/count](https://peacelock-download-tracker.vibelock.workers.dev/count)
+- Live count JSON (`{project, views, downloads, total}`): [https://peacelock-download-tracker.vibelock.workers.dev/count](https://peacelock-download-tracker.vibelock.workers.dev/count)
 - Stats: [https://peacelock-download-tracker.vibelock.workers.dev/stats](https://peacelock-download-tracker.vibelock.workers.dev/stats)
 - GitHub releases: [https://github.com/AzielEliab/peacelock/releases](https://github.com/AzielEliab/peacelock/releases)
 

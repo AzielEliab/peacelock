@@ -7,6 +7,7 @@ import { handleRuntimeApi } from "./runtime.js";
  * GET  /download?repo=AzielEliab/peacelock&tag=latest&asset=...
  *      increments KV, serves gzip via ASSETS.fetch (no 302)
  *      (default https://github.com/AzielEliab/peacelock/releases)
+ * GET  /count   JSON {project, views, downloads, total} — total = downloads (azhub convention)
  * GET  /stats   JSON totals + per-repo + per-branch breakdown
  * POST /event   forks report a download {owner,repo,branch,fork,asset}
  *
@@ -329,7 +330,12 @@ export default {
 
     if (url.pathname === "/count" && request.method === "GET") {
       const stats = await collectStats(env);
-      return json({ project: PROJECT, total: stats.total || 0 });
+      return json({
+        project: PROJECT,
+        views: stats.views || 0,
+        downloads: stats.downloads || 0,
+        total: stats.total || 0,
+      });
     }
 
     if (url.pathname === "/stats" && request.method === "GET") {
