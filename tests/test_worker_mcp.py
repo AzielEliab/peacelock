@@ -46,7 +46,10 @@ def test_mcp_points_at_fraggate_slug_peacelock() -> None:
     assert 'slug: "peacelock"' in RUNTIME or "slug=peacelock" in RUNTIME
     assert "aziel-runtime.vibelock.workers.dev" in RUNTIME
     assert "/v1/fraggate/call" in RUNTIME
+    assert "/v1/fraggate/list" in RUNTIME
+    assert "/v1/fraggate/describe" in RUNTIME
     assert 'door: "fraggate"' in RUNTIME or "door: 'fraggate'" in RUNTIME
+    assert "AZIEL_RUNTIME" in RUNTIME or "env.AZIEL_RUNTIME" in RUNTIME
 
 
 def test_mcp_refuses_transcript_and_duty_bypass() -> None:

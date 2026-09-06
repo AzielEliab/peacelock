@@ -126,7 +126,8 @@ PAGE = r"""<!DOCTYPE html>
       <button type="button" class="ghost" id="btn-break">Break</button>
       <button type="button" class="ghost" id="btn-show">Show</button>
       <button type="button" class="ghost" id="btn-verify">Verify</button>
-      <button type="button" class="ghost" id="btn-doctor">Doctor</button>
+      <button type="button" class="ghost" id="btn-health">Health</button>
+      <button type="button" class="ghost" id="btn-skill">Skill</button>
     </div>
   </fieldset>
   <fieldset>
@@ -177,7 +178,8 @@ document.getElementById("btn-seal").onclick = function () { run("/seal"); };
 document.getElementById("btn-break").onclick = function () { run("/break"); };
 document.getElementById("btn-show").onclick = function () { run("/show"); };
 document.getElementById("btn-verify").onclick = function () { run("/verify"); };
-document.getElementById("btn-doctor").onclick = function () { run("/doctor"); };
+document.getElementById("btn-health").onclick = function () { run("/health"); };
+document.getElementById("btn-skill").onclick = function () { run("/skill"); };
 document.getElementById("btn-export").onclick = function () { run("/export"); };
 document.getElementById("btn-upload").onclick = async function () {
   var f = document.getElementById("file").files[0];
@@ -279,6 +281,24 @@ class _Handler(BaseHTTPRequestHandler):
                     note=str(body.get("note") or ""),
                 )
                 return self._json({"ok": True, "action": "envelope", "receipt": rec.to_dict()})
+            if path == "/health":
+                return self._json({
+                    "ok": True,
+                    "action": "health",
+                    "product": "peacelock",
+                    "version": __version__,
+                    "author": "Aziel Eliab",
+                    "door": "fraggate",
+                    "note": "Local UI health. Catalog FragGate op is health. peacelock doctor remains CLI-only — not a FragGate LIVE_OPS.",
+                })
+            if path == "/skill":
+                return self._json({
+                    "ok": True,
+                    "action": "skill",
+                    "product": "peacelock",
+                    "author": "Aziel Eliab",
+                    "skill": "PeaceLock PL-WP-0.1. Transcript always ABSENT. HARD_DUTY cannot be bypassed. Catalog LIVE_OPS: open/seal/break/show/verify/stamp/upload_envelope/health/skill.",
+                })
             if path == "/doctor":
                 from peacelock.doctor import run_doctor
                 import io
@@ -292,6 +312,9 @@ class _Handler(BaseHTTPRequestHandler):
                     sys.stdout = old
                 payload = json.loads(buf.getvalue() or "{}")
                 payload["exit"] = rc
+                payload["worker_local"] = True
+                payload["fraggate_live"] = False
+                payload["note"] = "CLI/local self-check. Not a FragGate LIVE_OPS. UI Health maps to /health."
                 return self._json(payload, 200 if rc == 0 else 400)
             if path == "/export":
                 return self._json({"ok": True, "action": "export", "jsonl": ledger.export_jsonl()})

@@ -1,6 +1,6 @@
 name = "peacelock-download-tracker"
 main = "src/index.js"
-compatibility_date = "2026-09-01"
+compatibility_date = "2026-09-06"
 workers_dev = true
 account_id = "ac575a9b822bea2bed97d0ab73aed238"
 
@@ -13,7 +13,15 @@ id = "00000000000000000000000000000001"
 directory = "./public"
 binding = "ASSETS"
 # /mcp and /mcp/ must hit the Worker (not ASSETS) so GET/POST MCP is not 404.
+# /v1/* covers /v1/fraggate/* (AZIEL_RUNTIME proxy) and local /v1/{op}.
 run_worker_first = ["/", "/download", "/download/*", "/stats", "/event", "/go", "/count", "/install.sh", "/v1", "/v1/*", "/openapi.json", "/ai", "/ai/*", "/mcp", "/mcp/", "/cite.json", "/sitemap.xml", "/robots.txt", "/llms.txt", "/ai.txt"]
+
+[vars]
+AZIEL_RUNTIME_ORIGIN = "https://aziel-runtime.vibelock.workers.dev"
+
+[[services]]
+binding = "AZIEL_RUNTIME"
+service = "aziel-runtime"
 
 [observability]
 enabled = true

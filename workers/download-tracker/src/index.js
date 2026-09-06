@@ -26,7 +26,7 @@ function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, MCP-Protocol-Version, mcp-session-id, User-Agent, Authorization",
   };
 }
 
@@ -317,7 +317,7 @@ export default {
     }
 
 
-    const runtime = await handleRuntimeApi(request, url);
+    const runtime = await handleRuntimeApi(request, url, env);
     if (runtime) return runtime;
 
 
