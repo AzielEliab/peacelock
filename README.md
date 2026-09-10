@@ -154,8 +154,9 @@ Runtime is stdlib only (`hashlib`, `json`). No extra crypto packages.
 - [ShadowLock](https://github.com/AzielEliab/shadowlock) — zero-retention observation
 - [DecisionGATE](https://github.com/AzielEliab/decisiongate) — five sequential gates
 - [FragGate](https://github.com/AzielEliab/fraggate) — one door: discover, route, refuse
-- [aziel-runtime](https://github.com/AzielEliab/aziel-runtime) — catalog + MCP + OpenAPI (QNS-CD-1.0 cite field)
-- [qnm-node](https://github.com/AzielEliab/qnm-node) — local Quantum Node Mesh process (qnsd / photon QNS1; not hosted here)
+- [aziel-runtime](https://github.com/AzielEliab/aziel-runtime) — catalog + MCP + OpenAPI (`qns_cd` cite field)
+- [QNS-CD-1.0](https://github.com/AzielEliab/aziel-runtime/blob/main/docs/designs/QNS-CD-1.0.md) — photon QNS1 1.3 packet-transfer coding design (Worker cites only)
+- [qnm-node](https://github.com/AzielEliab/qnm-node) — local Quantum Node Mesh process (`qnsd` / photon QNS1; not hosted here)
 - [AZInterface](https://github.com/AzielEliab/azinterface) — pair custody (AIH page cycles)
 - [Aziel Digital Library](https://www.azielcorpuslibrary.net/)
 - [godlock.uk](https://godlock.uk/)

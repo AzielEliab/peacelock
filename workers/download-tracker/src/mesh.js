@@ -33,11 +33,17 @@ export const MESH_LEAVE_PATH = "/v1/mesh/leave";
 export const MESH_BROADCAST_PATH = "/v1/mesh/broadcast";
 export const ANON_BROADCAST = "https://github.com/AzielEliab/anon-broadcast";
 
-/** Photon QNS1 packet transfer. Local qnsd is qnm-node. Not hosted here. */
+/** QNS-CD-1.0 — photon QNS1 packet transfer. Hub cite / Worker mesh cross-map only. */
 export const QNS_CD_SPEC = "QNS-CD-1.0";
 export const QNS_CD_NAME = "photon QNS1 packet transfer";
+export const QNS_PHOTON = "QNS1 1.3";
+export const QNS_MAGIC = "QNS1";
+export const QNS_PROCESS = "qnsd";
 export const QNSD_REPO = "https://github.com/AzielEliab/qnm-node";
 export const QNS_CD_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
+export const QNS_CD_DESIGNS = "https://github.com/AzielEliab/aziel-runtime/tree/main/docs/designs";
+export const QNS_CD_PAPER = "https://github.com/AzielEliab/aziel-runtime/blob/main/docs/designs/QNS-CD-1.0.md";
+export const QNS_CD_MESH_DOCS = "https://github.com/AzielEliab/aziel-runtime/blob/main/docs/NODE_MESH.md";
 export const QNS_CD_PAIR_CUSTODY = "https://github.com/AzielEliab/azinterface";
 export const QNS_CD_PUBLIC_PROXY = false;
 export const QNS_CD_SOFTWARE_TAB = false;
@@ -46,24 +52,42 @@ export const QNS_CD = Object.freeze({
   spec: QNS_CD_SPEC,
   name: QNS_CD_NAME,
   kind: "hub_cite",
+  local: QNSD_REPO,
+  note: "Photon vias on local qnsd; Worker cites only",
+  photon: QNS_PHOTON,
+  magic: QNS_MAGIC,
+  process: QNS_PROCESS,
+  bind: "127.0.0.1",
+  companion: Object.freeze(["QNM-BUILD-1.0", "AIH-WP-1.3"]),
+  hub_companion: "AIH-WP-1.1",
+  software_tab: false,
   softwares_tab: false,
+  fraggate_slug: false,
+  public_proxy: false,
   public_qnsd_proxy: false,
+  emit: false,
+  wipe: false,
+  control_plane: false,
+  loopback_only: true,
+  qnsd: false,
   node_gate: false,
   default_off: true,
-  identity: IDENTITY,
-  author: IDENTITY,
+  paper: "docs/designs/QNS-CD-1.0.md",
+  paper_url: QNS_CD_PAPER,
+  path: "/v1/qns",
   local_qnsd: "qnm-node/",
   qnsd_repo: QNSD_REPO,
   runtime: QNS_CD_RUNTIME,
-  runtime_docs: QNS_CD_RUNTIME + "/blob/main/docs/NODE_MESH.md",
-  runtime_designs: QNS_CD_RUNTIME + "/blob/main/docs/designs/QNM-WP-1.0.md",
+  runtime_docs: QNS_CD_MESH_DOCS,
+  runtime_designs: QNS_CD_DESIGNS,
   qnm_docs: QNSD_REPO + "/blob/main/docs/QNM-BUILD-1.0.md",
   pair_custody: QNS_CD_PAIR_CUSTODY,
-  note: "QNS-CD-1.0 photon QNS1 packet transfer. Local qnsd is qnm-node. Runtime cite + catalog field only. Not a Softwares-tab product. No public qnsd proxy. No Node Gate. Pair custody is AZInterface. Author: Aziel Eliab only.",
+  identity: IDENTITY,
+  author: IDENTITY,
 });
 
 export const MESH_NOTE =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No public qnsd proxy. No auto-heal. Not an anonymity network. Author: Aziel Eliab only.";
+  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only). Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No public qnsd proxy. No auto-heal. Not an anonymity network. Author: Aziel Eliab only.";
 
 export const MESH_OPS = Object.freeze([
   "status",

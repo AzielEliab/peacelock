@@ -36,13 +36,19 @@ def test_mesh_contract_default_off_qnm_law() -> None:
     assert 'QNS_CD_SPEC = "QNS-CD-1.0"' in MESH
     assert "export const QNS_CD" in MESH
     assert "photon QNS1 packet transfer" in MESH
+    assert "QNS1 1.3" in MESH
     assert "https://github.com/AzielEliab/qnm-node" in MESH
     assert "https://github.com/AzielEliab/aziel-runtime" in MESH
+    assert "https://github.com/AzielEliab/azinterface" in MESH
+    assert "docs/designs/QNS-CD-1.0.md" in MESH
     assert "QNS-CD-1.0" in MESH
     assert "QNS_CD_PUBLIC_PROXY = false" in MESH
     assert "QNS_CD_SOFTWARE_TAB = false" in MESH
     assert "public_qnsd_proxy: false" in MESH
+    assert "public_proxy: false" in MESH
+    assert "software_tab: false" in MESH
     assert "softwares_tab: false" in MESH
+    assert "Photon vias on local qnsd" in MESH
     assert "No public qnsd proxy" in MESH
     assert "QNS-CD-1.0" in MESH.split("export const MESH_NOTE")[1].split("export const MESH_OPS")[0]
 
