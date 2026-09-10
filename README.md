@@ -48,7 +48,7 @@ The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
 - One-click install: [https://peacelock-download-tracker.vibelock.workers.dev/install.sh](https://peacelock-download-tracker.vibelock.workers.dev/install.sh)
 - Skill: [https://peacelock-download-tracker.vibelock.workers.dev/v1/skill](https://peacelock-download-tracker.vibelock.workers.dev/v1/skill)
 - FragGate proxy: [list](https://peacelock-download-tracker.vibelock.workers.dev/v1/fraggate/list) · describe · [call](https://peacelock-download-tracker.vibelock.workers.dev/v1/fraggate/call) via AZIEL_RUNTIME
-- Suite mesh proxy: [https://peacelock-download-tracker.vibelock.workers.dev/v1/mesh](https://peacelock-download-tracker.vibelock.workers.dev/v1/mesh) — default OFF; QNM live / locked / isolated
+- Suite mesh proxy: [https://peacelock-download-tracker.vibelock.workers.dev/v1/mesh](https://peacelock-download-tracker.vibelock.workers.dev/v1/mesh) — default OFF; QNM live / locked / isolated; QNS-CD-1.0 hub cite (photon QNS1; local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node); runtime catalog in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime)). Not a Softwares-tab product. No public qnsd proxy.
 - Worker MCP: [https://peacelock-download-tracker.vibelock.workers.dev/mcp](https://peacelock-download-tracker.vibelock.workers.dev/mcp) — GET docs / POST JSON-RPC (health/skill/open/seal/break/show/verify)
 - OpenAPI: [https://peacelock-download-tracker.vibelock.workers.dev/openapi.json](https://peacelock-download-tracker.vibelock.workers.dev/openapi.json)
 - GitHub: [https://github.com/AzielEliab/peacelock](https://github.com/AzielEliab/peacelock)
@@ -154,7 +154,9 @@ Runtime is stdlib only (`hashlib`, `json`). No extra crypto packages.
 - [ShadowLock](https://github.com/AzielEliab/shadowlock) — zero-retention observation
 - [DecisionGATE](https://github.com/AzielEliab/decisiongate) — five sequential gates
 - [FragGate](https://github.com/AzielEliab/fraggate) — one door: discover, route, refuse
-- [aziel-runtime](https://github.com/AzielEliab/aziel-runtime) — catalog + MCP + OpenAPI
+- [aziel-runtime](https://github.com/AzielEliab/aziel-runtime) — catalog + MCP + OpenAPI (QNS-CD-1.0 cite field)
+- [qnm-node](https://github.com/AzielEliab/qnm-node) — local Quantum Node Mesh process (qnsd / photon QNS1; not hosted here)
+- [AZInterface](https://github.com/AzielEliab/azinterface) — pair custody (AIH page cycles)
 - [Aziel Digital Library](https://www.azielcorpuslibrary.net/)
 - [godlock.uk](https://godlock.uk/)
 - [www.azieleliab.com](https://www.azieleliab.com/)
@@ -168,7 +170,7 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
 - Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp` (FragGate slug `peacelock`)
 
-Agents use this Worker `/mcp` (thin doubles of health/skill/open/seal/break/show/verify) or OpenAPI/MCP via aziel-runtime. This Worker `/v1/fraggate/*` and `/v1/mesh/*` PROXY via AZIEL_RUNTIME. Humans use the complete Worker UI (catalog labels: open/seal/break/show/verify/health/skill, plus upload, import/export, Live Nodes strip). Dual surface: do not gut the human UI. `peacelock doctor` is a local CLI self-check — not a FragGate LIVE_OPS. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Anon-broadcast is not a publish path.
+Agents use this Worker `/mcp` (thin doubles of health/skill/open/seal/break/show/verify) or OpenAPI/MCP via aziel-runtime. This Worker `/v1/fraggate/*` and `/v1/mesh/*` PROXY via AZIEL_RUNTIME. Humans use the complete Worker UI (catalog labels: open/seal/break/show/verify/health/skill, plus upload, import/export, Live Nodes strip). Dual surface: do not gut the human UI. `peacelock doctor` is a local CLI self-check — not a FragGate LIVE_OPS. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node); runtime cites in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime)). Not a Softwares-tab product. No Node Gate. No public qnsd proxy. No auto-heal. Not anonymity. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Anon-broadcast is not a publish path.
 
 Always send `User-Agent: Mozilla/5.0`.
 
@@ -193,7 +195,7 @@ Author: **Aziel Eliab**. Honest scope: quiet-window receipts, not transcripts.
 - This Worker skill: `GET https://peacelock-download-tracker.vibelock.workers.dev/v1/skill`
 - This Worker OpenAPI: https://peacelock-download-tracker.vibelock.workers.dev/openapi.json
 
-Local UI labels match catalog: Open / Seal / Break / Show / Verify / Health / Skill. Upload file option hashes bytes and stamps timestamp + date. Worker homepage adds the suite Live Nodes strip (`GET /v1/mesh`). CLI `peacelock doctor` remains a local self-check — not a FragGate live op.
+Local UI labels match catalog: Open / Seal / Break / Show / Verify / Health / Skill. Upload file option hashes bytes and stamps timestamp + date. Worker homepage adds the suite Live Nodes strip (`GET /v1/mesh`) with the QNS-CD-1.0 cross-map. CLI `peacelock doctor` remains a local self-check — not a FragGate live op.
 
 Counted download (gzip HTTP 200, no 302): https://peacelock-download-tracker.vibelock.workers.dev/download?asset=peacelock-0.1.0.tar.gz
 GitHub: https://github.com/AzielEliab/peacelock

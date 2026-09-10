@@ -89,6 +89,7 @@ def test_home_live_nodes_strip() -> None:
     assert 'id="meshStrip"' in HOME
     assert "Live Nodes" in HOME
     assert "QNM-BUILD-1.0" in HOME
+    assert "QNS-CD-1.0" in HOME
     assert "No Node Gate" in HOME
     assert "No auto-heal" in HOME
     assert "Not an anonymity network" in HOME
