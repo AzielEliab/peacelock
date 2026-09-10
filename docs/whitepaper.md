@@ -134,9 +134,12 @@ PeaceLock sits beside [TemporalLock](https://github.com/AzielEliab/temporallock)
 
 The Worker homepage shows a suite Live Nodes strip. `/v1/fraggate/*`,
 `/v1/runtime/*`, and `/v1/mesh/*` PROXY to aziel-runtime. Suite mesh
-default OFF. QNM rollup is live|locked|isolated counts only. No Node
-Gate. No auto-heal. Not an anonymity network. Anon-broadcast is not a
-publish path. PeaceLock remains a quiet-window receipt lattice.
+default OFF. QNM rollup is live|locked|isolated counts only. QNS-CD-1.0
+(photon QNS1 packet transfer) is a hub cite / mesh cross-map only —
+local qnsd lives in qnm-node; this Worker does not host a public qnsd
+proxy. No Node Gate. No auto-heal. Not an anonymity network.
+Anon-broadcast is not a publish path. PeaceLock remains a quiet-window
+receipt lattice.
 
 ---
 
