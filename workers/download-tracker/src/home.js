@@ -334,8 +334,8 @@ export function renderHome(stats) {
   <div class="wrap">
     <header>
       <div class="brandrow">
-        <img class="brandmark" src="/sigil.png" width="40" height="40" alt="Everblooming sigil — Aziel Eliab" decoding="async">
-        <p class="stamp">Everblooming sigil · Aziel Eliab</p>
+        <img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async">
+        <p class="stamp">Aziel Eliab</p>
       </div>
       <div class="appbar">
         <div>

@@ -19,8 +19,10 @@ def test_seo_and_softwareapplication_json_ld() -> None:
     assert "Aziel Eliab" in HOME
     assert "cite.json" in HOME
     assert "sitemap.xml" in HOME
-    assert "Everblooming sigil" in HOME
-    assert "/sigil.png" in HOME
+    assert 'class="brandmark"' in HOME
+    assert 'src="/sigil.png"' in HOME
+    assert 'alt=""' in HOME
+    assert "Everblooming sigil" not in HOME
 
 
 def test_workspace_calls_real_ops() -> None:
