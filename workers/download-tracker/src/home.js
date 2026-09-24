@@ -21,7 +21,7 @@ const INSTALL_LINE = "curl -fsSL https://peacelock-download-tracker.vibelock.wor
 const DESCRIPTION =
   "PeaceLock is Aziel Eliab software: chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1). Transcript always ABSENT. HARD_DUTY cannot be bypassed. Apache-2.0.";
 const HONEST =
-  "THIS IS: chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1). THIS IS NOT: a gag-order kit, a wiretap, or third-party binding. HARD_DUTY cannot be bypassed. The Worker does not store ledgers. Hosted /v1 is stateless: this browser holds the ledger. Author Aziel Eliab.";
+  "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1). HARD_DUTY cannot be bypassed. The Worker does not store ledgers. Hosted /v1 is stateless: this browser holds the ledger. Author Aziel Eliab.";
 const HOW_TO_CITE =
   "Eliab, Aziel. (2026). PeaceLock 0.1.0 [Software]. Apache-2.0. https://github.com/AzielEliab/peacelock · https://peacelock-download-tracker.vibelock.workers.dev/";
 
@@ -251,13 +251,35 @@ export function renderHome(stats) {
 <style>
   :root {
     color-scheme: dark;
-    --bg: #0b0b0b; --panel: #141414; --ink: #e8e0d0; --muted: #9aa3b2;
-    --line: #2a2414; --gold: #c9a227; --gold-dim: #c9a227; --pass: #3dba7a; --bad: #d4534b; --focus: #e6d19a;
+    --bg: #0b0b0b; --panel: #141414; --ink: #e8e0d0; --muted: #b7c0ce;
+    --line: #2a2414; --gold: #e0bc4a; --gold-dim: #c9a227; --on-gold: #14110a;
+    --pass: #5ddea0; --bad: #ff9b94; --focus: #f0d78c;
+    --field: #0e0e0e; --chip: #101010; --link: #f0d78c;
+    --banner-bg: #241c0d; --banner-ink: #f6e7b8; --banner-line: #8a7040;
+    --ok-line: #3d9a68; --bad-line: #c46b66;
+    --download-fill: #e8eaef; --download-ink: #0e1014;
+    --iso: #b7c0ce; --mesh-btn: #101010; --mesh-btn-hover: #241c0d;
+    --shadow: 0 0 0 1px #d4af3714, 0 16px 40px #0006;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: light;
+      --bg: #f7f4ec; --panel: #fffdf8; --ink: #1a160f; --muted: #5c5346;
+      --line: #e4d8c0; --gold: #6b4f0d; --gold-dim: #c9a227; --on-gold: #14110a;
+      --pass: #0d6b3a; --bad: #9c2b24; --focus: #6b4f0d;
+      --field: #ffffff; --chip: #f4f0e6; --link: #6b4f0d;
+      --banner-bg: #fbf6e8; --banner-ink: #3a3112; --banner-line: #c4ae6a;
+      --ok-line: #0d6b3a; --bad-line: #9c2b24;
+      --download-fill: #1a160f; --download-ink: #f7f4ec;
+      --iso: #5c5346; --mesh-btn: #fffdf8; --mesh-btn-hover: #f4ead0;
+      --shadow: 0 0 0 1px #6b4f0d14, 0 12px 28px #1a160f14;
+    }
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
   body { font: 16px/1.5 system-ui, "Segoe UI", sans-serif; }
-  a { color: #e6d19a; }
+  a { color: var(--link); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
   code, pre, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
   .wrap { max-width: 58rem; margin: 0 auto; padding: 1.4rem 1.2rem 4.5rem; }
   .brandrow { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
@@ -267,41 +289,40 @@ export function renderHome(stats) {
   h1 { font-size: 2rem; letter-spacing: .02em; margin: 0 0 .2rem; }
   .motto { color: var(--gold); font-style: italic; margin: 0 0 .7rem; }
   .lede { color: var(--muted); margin: 0 0 1rem; max-width: 46rem; }
-  .pill { font: 650 .78rem/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: .4rem .7rem; color: var(--muted); background: #101010; }
-  .pill.ok { color: var(--pass); border-color: #2f6b48; }
-  .pill.bad { color: var(--bad); border-color: #7a2f2c; }
+  .pill { font: 650 .78rem/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: .4rem .7rem; color: var(--muted); background: var(--chip); }
+  .pill.ok { color: var(--pass); border-color: var(--ok-line); }
+  .pill.bad { color: var(--bad); border-color: var(--bad-line); }
   nav.toc { display: flex; flex-wrap: wrap; gap: .55rem; margin: 0 0 1.1rem; }
   nav.toc a { text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: .35rem .75rem; font-size: .88rem; }
-  .banner { border: 1px solid #5c4a1a; background: #241c0d; color: #f0d78c; padding: .9rem 1rem; border-radius: 10px; margin: 0 0 1.15rem; font-size: .94rem; }
+  .banner { border: 1px solid var(--banner-line); background: var(--banner-bg); color: var(--banner-ink); padding: .9rem 1rem; border-radius: 10px; margin: 0 0 1.15rem; font-size: .94rem; }
   .card, .workspace, .cite { border: 1px solid var(--line); border-radius: 14px; padding: 1.15rem 1.2rem 1.25rem; background: var(--panel); margin: 0 0 1.1rem; }
-  .workspace { box-shadow: 0 0 0 1px #d4af3714, 0 16px 40px #0006; }
+  .workspace { box-shadow: var(--shadow); }
   h2 { font-size: 1.12rem; margin: 0 0 .45rem; letter-spacing: .04em; }
   .kicker { display: block; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: .15rem; font-family: ui-monospace, Menlo, Consolas, monospace; }
   .workgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 1rem; }
   @media (max-width: 820px) { .workgrid { grid-template-columns: 1fr; } }
   label { display: block; font-size: .92rem; margin: .75rem 0 .28rem; }
-  input[type="text"], input[type="number"], textarea, select { width: 100%; padding: .58rem .7rem; border: 1px solid var(--line); border-radius: 8px; background: #0e0e0e; color: var(--ink); font: inherit; }
-  input:focus, textarea:focus, select:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+  input[type="text"], input[type="number"], textarea, select { width: 100%; padding: .58rem .7rem; border: 1px solid var(--line); border-radius: 8px; background: var(--field); color: var(--ink); font: inherit; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
   @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
   .actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: .95rem 0 .2rem; }
   button, a.btn { font: 700 .88rem/1.1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .03em; padding: .72rem .9rem; border-radius: 9px; border: 1px solid transparent; cursor: pointer; text-decoration: none; display: inline-block; }
-  button.gold, a.btn.gold { background: var(--gold-dim); color: #14110a; }
+  button.gold, a.btn.gold { background: var(--gold-dim); color: var(--on-gold); }
   button.ink, a.btn.ink { background: var(--ink); color: var(--bg); }
   button.ghost, a.btn.ghost, label.filebtn { background: transparent; color: var(--ink); border-color: var(--line); }
-  button.copied { background: var(--pass); color: #0e1014; }
+  button.copied { background: var(--pass); color: var(--on-gold); }
   label.filebtn { padding: .72rem .9rem; border-radius: 9px; cursor: pointer; font: 700 .88rem/1.1 ui-monospace, Menlo, Consolas, monospace; }
   label.filebtn input { display: none; }
-  .status { margin: 0 0 .8rem; padding: .75rem .85rem; border-radius: 10px; border: 1px solid var(--line); background: #101010; color: var(--muted); }
-  .status.ok { color: var(--pass); border-color: #2f6b48; }
-  .status.bad { color: var(--bad); border-color: #7a2f2c; }
+  .status { margin: 0 0 .8rem; padding: .75rem .85rem; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); color: var(--muted); }
+  .status.ok { color: var(--pass); border-color: var(--ok-line); }
+  .status.bad { color: var(--bad); border-color: var(--bad-line); }
   .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem; margin: 0 0 .85rem; }
   @media (max-width: 720px) { .metrics { grid-template-columns: 1fr 1fr; } }
-  .metric { border: 1px solid var(--line); border-radius: 10px; padding: .55rem .65rem; background: #101010; }
+  .metric { border: 1px solid var(--line); border-radius: 10px; padding: .55rem .65rem; background: var(--chip); }
   .metric b { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
   .metric span { display: block; font-size: .78rem; word-break: break-all; color: var(--ink); }
   ol.receipts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .65rem; }
-  .receipt { border: 1px solid var(--line); border-radius: 10px; padding: .75rem .85rem; background: #101010; position: relative; }
+  .receipt { border: 1px solid var(--line); border-radius: 10px; padding: .75rem .85rem; background: var(--chip); position: relative; }
   .receipt::before { content: ""; position: absolute; left: -1px; top: 0; bottom: 0; width: 3px; background: var(--gold); border-radius: 10px 0 0 10px; }
   .receipt h3 { margin: 0 0 .25rem; font-size: .95rem; }
   .receipt p { margin: .2rem 0; }
@@ -312,22 +333,31 @@ export function renderHome(stats) {
   .btns { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 0 0 .85rem; }
   @media (max-width: 520px) { .btns { grid-template-columns: 1fr; } }
   a.btn.block, button.btn.block { display: block; width: 100%; text-align: center; font-size: 1.15rem; padding: 1rem 1.1rem; }
-  a.btn.primary { background: #e8eaef; color: #0e1014; }
-  button.btn.install { background: var(--gold-dim); color: #14110a; }
-  pre { background: #0e0e0e; padding: .75rem .9rem; overflow: auto; border-radius: 8px; font-size: .82rem; }
+  a.btn.primary { background: var(--download-fill); color: var(--download-ink); }
+  button.btn.install { background: var(--gold-dim); color: var(--on-gold); }
+  pre { background: var(--field); padding: .75rem .9rem; overflow: auto; border-radius: 8px; font-size: .82rem; color: var(--ink); }
   .meta { margin-top: 1rem; color: var(--muted); font-size: .92rem; }
-  .iso { margin-top: .75rem; font-size: .85rem; color: #7d8696; }
+  .iso { margin-top: .75rem; font-size: .85rem; color: var(--iso); }
+  .path { display: grid; grid-template-columns: 1.35fr .85fr; gap: .6rem; margin: 1rem 0 .35rem; }
+  .path button { width: 100%; text-align: center; padding: .9rem 1rem; font-size: 1rem; }
+  .path-hint { margin: .15rem 0 0; color: var(--muted); font-size: .92rem; }
+  @media (max-width: 520px) { .path { grid-template-columns: 1fr; } }
+  details.more { margin-top: .95rem; border: 1px solid var(--line); border-radius: 10px; background: var(--chip); padding: .7rem .85rem .85rem; }
+  details.more summary, details.mesh-controls summary { cursor: pointer; font-weight: 650; color: var(--ink); }
+  details.mesh-controls { flex-basis: 100%; margin: 0; }
+  .mesh-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: .65rem; }
+  .mesh-law { color: var(--muted); }
   details.raw { margin-top: .8rem; }
   details.raw pre { max-height: 18rem; }
   footer { color: var(--muted); font-size: .9rem; }
-  #meshStrip { border: 1px solid var(--gold); border-radius: 14px; padding: .85rem 1rem; background: var(--panel); margin: 0 0 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .7rem 1rem; font-size: .88rem; color: var(--muted); }
+  #meshStrip { border: 1px solid var(--line); border-radius: 14px; padding: .85rem 1rem; background: var(--panel); margin: 0 0 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .7rem 1rem; font-size: .88rem; color: var(--muted); }
   #meshStrip .live { color: var(--ink); }
   #meshStrip .live b { color: var(--gold); font-size: 1.35rem; margin-right: .35rem; }
   #meshStrip .rollup b { color: var(--gold); }
-  #meshStrip button { font: 700 .78rem/1 ui-monospace, Menlo, Consolas, monospace; height: 2rem; padding: 0 .75rem; border-radius: 8px; background: #101010; color: var(--ink); border: 1px solid var(--gold); cursor: pointer; }
-  #meshStrip button:hover { background: #241c0d; color: var(--gold); }
-  #meshStrip input { width: 10rem; padding: .4rem .55rem; border: 1px solid var(--gold); border-radius: 8px; background: #0e0e0e; color: var(--ink); font: inherit; }
-  #meshProducts { flex-basis: 100%; margin: 0; }
+  #meshStrip button { font: 700 .78rem/1 ui-monospace, Menlo, Consolas, monospace; height: 2rem; padding: 0 .75rem; border-radius: 8px; background: var(--mesh-btn); color: var(--ink); border: 1px solid var(--gold); cursor: pointer; }
+  #meshStrip button:hover { background: var(--mesh-btn-hover); color: var(--gold); }
+  #meshStrip input { width: 10rem; padding: .4rem .55rem; border: 1px solid var(--gold); border-radius: 8px; background: var(--field); color: var(--ink); font: inherit; }
+  #meshProducts { margin: .65rem 0 0; color: var(--muted); font-size: .82rem; }
 </style>
 </head>
 <body>
@@ -362,20 +392,23 @@ export function renderHome(stats) {
       <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
       <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.</div>
       <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
-      <div>No Node Gate · No public qnsd proxy · No auto-heal · Aziel Eliab only</div>
-      <div>
-        <input id="meshBearer" type="text" maxlength="80" placeholder="bearer (required to enable)" aria-label="mesh bearer">
-        <button id="meshEnable" type="button" title="Enable suite mesh. Declared bearer required. Default off.">Enable</button>
-        <button id="meshDisable" type="button" title="Disable suite mesh (always allowed)">Disable</button>
-        <button id="meshJoin" type="button" title="Join as peacelock. Refused while mesh is OFF. No auto-join.">Join</button>
-        <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
-      </div>
-      <div id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · QNS-CD-1.0 photon QNS1 (qnm-node local qnsd; hub cite only) · not AnonBroadcast · not AZMail ring · not a Node Gate · not a Softwares-tab product</div>
+      <div class="mesh-law">No Node Gate · No public qnsd proxy · No auto-heal · Aziel Eliab only</div>
+      <details class="mesh-controls">
+        <summary>Mesh controls</summary>
+        <div class="mesh-actions">
+          <input id="meshBearer" type="text" maxlength="80" placeholder="bearer (required to enable)" aria-label="mesh bearer">
+          <button id="meshEnable" type="button" title="Enable suite mesh. Declared bearer required. Default off.">Enable</button>
+          <button id="meshDisable" type="button" title="Disable suite mesh (always allowed)">Disable</button>
+          <button id="meshJoin" type="button" title="Join as peacelock. Refused while mesh is OFF. No auto-join.">Join</button>
+          <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
+        </div>
+        <div id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · QNS-CD-1.0 photon QNS1 (qnm-node local qnsd; hub cite only) · not AnonBroadcast · not AZMail ring · not a Node Gate · not a Softwares-tab product</div>
+      </details>
     </div>
 
     <section class="workspace" id="workspace">
       <h2><span class="kicker">Live software</span>Quiet workspace</h2>
-      <p class="lede">Use UI: catalog labels on this Worker — Open / Seal / Break / Show / Verify / Health / Skill (<code>POST /v1/open</code>, <code>/v1/seal</code>, <code>/v1/break</code>, <code>/v1/show</code>, <code>/v1/verify</code>, <code>GET /v1/health</code>, <code>GET /v1/skill</code>, plus <code>POST /v1/upload</code>). FragGate door proxy: <code>/v1/fraggate/list</code>, <code>/describe</code>, <code>/call</code> via AZIEL_RUNTIME. Suite mesh: <code>/v1/mesh/*</code> PROXY (default OFF; QNM live|locked|isolated; QNS-CD-1.0 hub cite; no Node Gate; no public qnsd proxy; no auto-heal; not anonymity). The Worker does not store your ledger. This page keeps it in this browser until you export it. Upload hashes file bytes and stamps <code>timestamp</code> + <code>date_stamp</code>. No unspoken words.</p>
+      <p class="lede">Open writes a quiet window. Seal locks it forward. This browser holds the ledger until you export it. The Worker does not store it. Transcript is always ABSENT. Writes use <code>POST /v1/open</code> and <code>POST /v1/seal</code>.</p>
       <div class="workgrid">
         <form id="ws-form" autocomplete="off">
           <div class="row2">
@@ -398,38 +431,44 @@ export function renderHome(stats) {
               <input id="channel" type="text" value="email">
             </div>
             <div>
-              <label for="duty"><span class="kicker">duty_check</span> HARD_DUTY refuses write.</label>
+              <label for="duty"><span class="kicker">duty_check</span> HARD_DUTY refuses the write.</label>
               <select id="duty"><option>NONE</option><option>ADVISORY</option><option>HARD_DUTY</option></select>
             </div>
           </div>
-          <label for="note"><span class="kicker">Note</span> Optional ≤140. No why.</label>
+          <label for="note"><span class="kicker">Note</span> Optional, 140 characters. No why.</label>
           <input id="note" type="text" maxlength="140" placeholder="window only">
-          <label for="pl_id"><span class="kicker">pl_id</span> Filled after open. Used by seal / break.</label>
+          <label for="pl_id"><span class="kicker">pl_id</span> Filled after open. Seal and break use it.</label>
           <input id="pl_id" type="text" placeholder="pl_…">
-          <label for="reason"><span class="kicker">break_reason</span></label>
-          <select id="reason">
-            <option>speech_occurred</option><option>act_occurred</option>
-            <option>operator_void</option><option>duty_conflict</option>
-          </select>
-          <label for="upload-file"><span class="kicker">Upload file</span> Operator-declared evidence. Bytes hashed. Timestamp + date stamp enter the lattice. Not a transcript.</label>
-          <input id="upload-file" type="file">
-          <div class="actions">
-            <button type="button" class="gold" id="btn-open">Open</button>
+          <div class="path" role="group" aria-label="Open and seal">
+            <button type="button" class="gold path-primary" id="btn-open">Open</button>
             <button type="button" class="ink" id="btn-seal">Seal</button>
-            <button type="button" class="ghost" id="btn-break">Break</button>
-            <button type="button" class="ghost" id="btn-show">Show</button>
-            <button type="button" class="ghost" id="btn-verify">Verify</button>
-            <button type="button" class="ghost" id="btn-health">Health</button>
-            <button type="button" class="ghost" id="btn-skill">Skill</button>
-            <button type="button" class="ghost" id="btn-lattice">Hardening</button>
-            <button type="button" class="ghost" id="btn-upload">Upload envelope</button>
-            <label class="filebtn">Import JSONL <input type="file" id="import-json" accept="application/json,.json,.jsonl"></label>
-            <button type="button" class="ghost" id="btn-export">Export</button>
-            <button type="button" class="ghost" id="btn-clear">Clear local ledger</button>
           </div>
+          <p class="path-hint">Open writes the window. Seal locks it forward.</p>
+          <details class="more">
+            <summary>Break, verify, and ledger</summary>
+            <label for="reason"><span class="kicker">break_reason</span></label>
+            <select id="reason">
+              <option>speech_occurred</option><option>act_occurred</option>
+              <option>operator_void</option><option>duty_conflict</option>
+            </select>
+            <label for="upload-file"><span class="kicker">Upload file</span> Hashes the bytes. Timestamp and date stamp enter the lattice. Transcript stays ABSENT.</label>
+            <input id="upload-file" type="file">
+            <div class="actions">
+              <button type="button" class="ghost" id="btn-break">Break</button>
+              <button type="button" class="ghost" id="btn-show">Show</button>
+              <button type="button" class="ghost" id="btn-verify">Verify</button>
+              <button type="button" class="ghost" id="btn-health">Health</button>
+              <button type="button" class="ghost" id="btn-skill">Skill</button>
+              <button type="button" class="ghost" id="btn-lattice">Hardening</button>
+              <button type="button" class="ghost" id="btn-upload">Upload envelope</button>
+              <label class="filebtn">Import JSONL <input type="file" id="import-json" accept="application/json,.json,.jsonl"></label>
+              <button type="button" class="ghost" id="btn-export">Export</button>
+              <button type="button" class="ghost" id="btn-clear">Clear local ledger</button>
+            </div>
+          </details>
         </form>
         <div>
-          <div class="status" id="ws-status">No quiet window yet. Open writes the first lattice node.</div>
+          <div class="status" id="ws-status" role="status" aria-live="polite">No quiet window yet. Open writes the first lattice node.</div>
           <div class="metrics">
             <div class="metric"><b>Length</b><span id="chain-length">0</span></div>
             <div class="metric"><b>State</b><span id="last-state">—</span></div>

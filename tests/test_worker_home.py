@@ -87,6 +87,24 @@ def test_home_and_seo_advertise_worker_mcp() -> None:
     assert "catalog_mcp" in HOME or "aziel-runtime.vibelock.workers.dev" in HOME
 
 
+def test_app_screen_one_open_lock_path() -> None:
+    """Human app screen: one Open/Seal path, gold focus, both color schemes."""
+    html = HOME[HOME.index("<!doctype html>") : HOME.rindex("</html>") + 7]
+    assert "@media (prefers-color-scheme: light)" in html
+    assert ":focus-visible" in html
+    assert "var(--focus)" in html
+    assert 'class="gold path-primary" id="btn-open"' in html
+    assert 'id="btn-seal"' in html
+    assert '<details class="more">' in html
+    assert '<details class="mesh-controls">' in html
+    assert "THIS IS NOT" not in html
+    assert "gag-order" not in html
+    assert 'id="meshLiveCount"' in html
+    assert ">Views<" in html
+    assert ">Downloads<" in html
+    assert "score" not in html.lower()
+
+
 def test_home_live_nodes_strip() -> None:
     assert 'id="meshStrip"' in HOME
     assert "Live Nodes" in HOME
