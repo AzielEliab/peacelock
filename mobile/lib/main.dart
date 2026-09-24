@@ -21,7 +21,9 @@ class PeaceLockApp extends StatelessWidget {
     return MaterialApp(
       title: 'PeaceLock',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
+      themeMode: ThemeMode.system,
       home: const LedgerPage(),
     );
   }
@@ -133,25 +135,67 @@ class _LedgerPageState extends State<LedgerPage> {
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'Chosen silence / chosen inaction as a first-class receipt.',
-            style: TextStyle(color: kGold, fontStyle: FontStyle.italic, fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'On-device append-only lattice. Transcript is always ABSENT. '
-            'HARD_DUTY cannot be bypassed. Not a gag-order kit. Author Aziel Eliab.',
+            'Record a silence or an inaction you chose, as a receipt on this device.',
           ),
           const SizedBox(height: 16),
-          TextField(controller: _channel, decoration: const InputDecoration(labelText: 'Channel')),
-          const SizedBox(height: 8),
-          TextField(controller: _note, decoration: const InputDecoration(labelText: 'Note ≤140 (no why)')),
+          TextField(controller: _channel, decoration: const InputDecoration(labelText: 'Where')),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          FilledButton(onPressed: _open, child: const Text('Open quiet window')),
+          const SizedBox(height: 8),
+          OutlinedButton(onPressed: () => setState(() => _verify = _runVerify()), child: const Text('Check ledger')),
+          const SizedBox(height: 8),
+          ExpansionTile(
+            title: const Text('Advanced'),
             children: [
-              FilledButton(onPressed: _open, child: const Text('Open')),
-              OutlinedButton(onPressed: () => setState(() => _verify = _runVerify()), child: const Text('Verify')),
+              const Align(alignment: Alignment.centerLeft, child: Text('What you are keeping')),
+              DropdownButton<String>(
+                isExpanded: true,
+                value: _mode,
+                items: const [
+                  DropdownMenuItem(value: 'SILENCE', child: Text('Silence')),
+                  DropdownMenuItem(value: 'INACTION', child: Text('Inaction')),
+                  DropdownMenuItem(value: 'BOTH', child: Text('Silence and inaction')),
+                ],
+                onChanged: (value) => setState(() => _mode = value ?? 'SILENCE'),
+              ),
+              const Align(alignment: Alignment.centerLeft, child: Text('Kind of act')),
+              DropdownButton<String>(
+                isExpanded: true,
+                value: _act,
+                items: const [
+                  DropdownMenuItem(value: 'reply', child: Text('Reply')),
+                  DropdownMenuItem(value: 'file', child: Text('File')),
+                  DropdownMenuItem(value: 'post', child: Text('Post')),
+                  DropdownMenuItem(value: 'other', child: Text('Other')),
+                ],
+                onChanged: (value) => setState(() => _act = value ?? 'reply'),
+              ),
+              const Align(alignment: Alignment.centerLeft, child: Text('Duty check')),
+              DropdownButton<String>(
+                isExpanded: true,
+                value: _duty,
+                items: const [
+                  DropdownMenuItem(value: 'NONE', child: Text('None')),
+                  DropdownMenuItem(value: 'ADVISORY', child: Text('Advisory')),
+                  DropdownMenuItem(value: 'HARD_DUTY', child: Text('HARD_DUTY')),
+                ],
+                onChanged: (value) => setState(() => _duty = value ?? 'NONE'),
+              ),
+              const SizedBox(height: 8),
+              TextField(controller: _note, decoration: const InputDecoration(labelText: 'Note, 140 characters or fewer')),
+            ],
+          ),
+          ExpansionTile(
+            title: const Text('About'),
+            children: const [
+              Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Author: Aziel Eliab. A receipt stores no transcript. Those fields stay ABSENT. '
+                  'HARD_DUTY refuses and writes nothing. This is a receipt for a quiet window you chose. '
+                  'It is not a gag-order kit, a wiretap, or third-party binding.',
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),

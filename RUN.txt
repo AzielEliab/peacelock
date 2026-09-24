@@ -1,0 +1,9 @@
+PeaceLock
+
+Record a quiet window you chose — silence, inaction, or both — as a receipt on this computer.
+
+1. python -m venv .venv && . .venv/bin/activate && pip install -e .
+2. peacelock ui
+3. Open http://127.0.0.1:8768/ and choose Open quiet window.
+
+Author: Aziel Eliab
