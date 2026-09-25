@@ -1,9 +1,10 @@
 # PeaceLock — iPhone & Android
 
-Open, seal, break, and verify a quiet-window lattice on device.
-Transcript is always ABSENT. HARD_DUTY cannot be bypassed.
+Record a quiet window you chose, on this device. Open a window, then check the ledger.
 
-Offline. No analytics. Dark matte / gold.
+Offline. No analytics. Light and dark follow the system. Gold focus.
+
+Author: Aziel Eliab.
 
 Application id: `com.azieeliab.peacelock`
 
@@ -22,10 +23,9 @@ flutter run
 Then open `android/` in Android Studio, or `ios/Runner.xcworkspace` in
 Xcode.
 
-## Honest scope
+## Notes
 
-Quiet windows are not transcripts, motives, or gag orders. Not a
-wiretap. Not third-party binding.
+The on-device screen opens a window and checks the ledger. Seal, break, and file hash are in the desktop `peacelock` command. A receipt stores no transcript. Those fields stay ABSENT. HARD_DUTY refuses and writes nothing.
 
 ## Desktop package (counted download)
 

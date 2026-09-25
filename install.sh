@@ -27,6 +27,6 @@ python -m pip install -e .
 
 echo
 echo "Installed PeaceLock."
-echo "Run:  peacelock ui"
-echo "Then open http://127.0.0.1:8768  (loopback only)"
-echo "Author: Aziel Eliab."
+echo "1. peacelock ui"
+echo "2. Open http://127.0.0.1:8768/"
+echo "Author: Aziel Eliab"

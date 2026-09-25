@@ -28,129 +28,185 @@ PAGE = r"""<!DOCTYPE html>
 <title>PeaceLock</title>
 <style>
   :root {
-    --bg: #0b0b0b; --panel: #141414; --ink: #e8e0d0; --muted: #8a7219;
-    --line: #2a2414; --gold: #c9a227; --focus: #e6d19a; --bad: #d4534b;
-    --pass: #3dba7a;
+    color-scheme: light;
+    --bg: #f7f4ec;
+    --panel: #fffdf8;
+    --ink: #1c1914;
+    --muted: #5e5648;
+    --line: #e3d9c4;
+    --gold: #c9a227;
+    --gold-ink: #1c1914;
+    --bad: #8c2f2c;
+    --bad-bg: #f8ecea;
+    --pass: #1d6b3a;
+    --pass-bg: #e7f5ec;
+    --shadow: 0 1px 2px rgba(28, 25, 20, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #12110e;
+      --panel: #1c1b16;
+      --ink: #f4efe4;
+      --muted: #c8bfae;
+      --line: #3a3428;
+      --gold: #c9a227;
+      --gold-ink: #1c1914;
+      --bad: #f0b4ae;
+      --bad-bg: #2a1816;
+      --pass: #9ed7b0;
+      --pass-bg: #16261c;
+      --shadow: none;
+    }
   }
   * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0; background: var(--bg); color: var(--ink);
-    font-family: system-ui, "Segoe UI", sans-serif; line-height: 1.45;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
   }
-  body { max-width: 48rem; margin: 0 auto; padding: 2.1rem 1.2rem 4rem; }
-  .tag {
-    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem;
-    letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+  body {
+    max-width: 40rem; margin: 0 auto;
+    padding: 2rem 1.25rem 3.5rem;
   }
-  h1 { font-size: 2rem; font-weight: 650; letter-spacing: 0.04em; margin: 0.35rem 0 0.25rem; }
-  .motto { color: var(--gold); font-style: italic; margin: 0 0 0.85rem; font-size: 1.05rem; }
-  .lede { color: #b8b09a; margin: 0 0 1.5rem; max-width: 42rem; }
-  fieldset {
-    border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
-    padding: 1.1rem 1.15rem 1.2rem; margin: 0 0 1rem;
+  header { margin: 0 0 1.25rem; }
+  .brand {
+    margin: 0; font-size: 0.78rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); font-weight: 650;
   }
-  legend {
-    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); padding: 0 0.4rem;
+  h1 { font-size: 1.85rem; font-weight: 650; letter-spacing: -0.02em; margin: 0.2rem 0 0.4rem; }
+  .lede { margin: 0; color: var(--muted); max-width: 38rem; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1.15rem 1.15rem 1.25rem; margin: 0 0 0.9rem;
+    box-shadow: var(--shadow);
   }
-  label { display: block; font-size: 0.92rem; margin: 0.85rem 0 0.3rem; }
-  textarea, input[type="text"], select {
-    width: 100%; padding: 0.55rem 0.65rem; border: 1px solid var(--line);
-    border-radius: 6px; background: #101010; color: var(--ink); font: inherit;
+  label { display: block; font-size: 0.92rem; font-weight: 600; margin: 0.85rem 0 0.35rem; }
+  label:first-child { margin-top: 0; }
+  textarea, input[type="text"], input[type="file"], select {
+    width: 100%; max-width: 100%; padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--ink); font: inherit;
   }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
-  .actions { display: flex; gap: 0.65rem; flex-wrap: wrap; margin: 0.9rem 0 0; }
+  .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0 0; }
   button {
-    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85rem;
-    letter-spacing: 0.04em; padding: 0.65rem 1rem; border-radius: 8px;
-    border: 1px solid var(--gold); background: var(--gold); color: var(--bg);
-    cursor: pointer; font-weight: 650;
+    font: inherit; font-weight: 650; min-height: 2.75rem;
+    padding: 0.55rem 1rem; border-radius: 10px;
+    border: 1px solid var(--gold); background: var(--gold); color: var(--gold-ink);
+    cursor: pointer;
   }
-  button.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-  .banner {
-    border: 1px solid #5c4a1a; background: #241c0d; color: #f0d78c;
-    padding: 0.85rem 1rem; border-radius: 10px; margin: 0 0 1.15rem; font-size: 0.92rem;
+  button.ghost {
+    background: transparent; color: var(--ink); border-color: var(--line); font-weight: 600;
   }
-  .status { margin: 0 0 0.8rem; padding: 0.75rem 0.85rem; border-radius: 10px; border: 1px solid var(--line); }
-  .status.ok { color: var(--pass); border-color: #2f6b48; }
-  .status.bad { color: var(--bad); border-color: #7a2f2c; }
-  pre { background: #101010; padding: 0.75rem 0.9rem; overflow: auto; border-radius: 8px; font-size: 0.78rem; }
-  .hash { font-size: 0.72rem; word-break: break-all; color: #9a9278; }
+  button:focus-visible, select:focus-visible, input:focus-visible,
+  summary:focus-visible, a:focus-visible {
+    outline: 2px solid var(--gold); outline-offset: 2px;
+  }
+  .status {
+    margin: 0 0 1rem; padding: 0.8rem 0.95rem; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--panel);
+  }
+  .status.ok { color: var(--pass); background: var(--pass-bg); border-color: transparent; }
+  .status.bad { color: var(--bad); background: var(--bad-bg); border-color: transparent; }
+  details {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 0.35rem 1rem 0.9rem; margin: 0 0 0.9rem;
+  }
+  summary {
+    cursor: pointer; font-weight: 650; padding: 0.7rem 0; min-height: 2.75rem;
+    display: flex; align-items: center;
+  }
+  .hint { color: var(--muted); margin: 0.2rem 0 0.6rem; font-size: 0.95rem; }
+  pre {
+    background: var(--bg); color: var(--ink); border: 1px solid var(--line);
+    padding: 0.75rem 0.85rem; border-radius: 8px; font-size: 0.78rem;
+    white-space: pre-wrap; word-break: break-word; margin: 0.8rem 0 0;
+  }
+  footer { color: var(--muted); font-size: 0.9rem; margin-top: 0.4rem; }
+  @media (max-width: 480px) {
+    body { padding: 1.15rem 1rem 2.5rem; }
+    h1 { font-size: 1.55rem; }
+    .actions { flex-direction: column; }
+    button { width: 100%; }
+  }
 </style>
 </head>
 <body>
-  <p class="tag">PeaceLock · PL-WP-0.1 · Aziel Eliab</p>
-  <h1>PeaceLock</h1>
-  <p class="motto">Chosen silence / chosen inaction as a first-class receipt.</p>
-  <p class="lede">Loopback only. Transcript is always ABSENT. HARD_DUTY cannot be bypassed. Not a gag-order kit.</p>
-  <p class="banner">__HONEST__</p>
-  <div id="status" class="status">No quiet window yet. Open writes the first lattice node.</div>
-  <fieldset>
-    <legend>Use</legend>
-    <div class="row2">
-      <div>
-        <label>Mode</label>
-        <select id="mode"><option>SILENCE</option><option>INACTION</option><option>BOTH</option></select>
-      </div>
-      <div>
-        <label>act_class</label>
-        <select id="act_class">
-          <option>reply</option><option>file</option><option>post</option><option>call</option>
-          <option>attend</option><option>sign</option><option>pay</option><option>transfer</option>
-          <option>delete</option><option>other</option>
-        </select>
-      </div>
-    </div>
-    <div class="row2">
-      <div>
-        <label>Channel</label>
-        <input id="channel" type="text" value="email">
-      </div>
-      <div>
-        <label>duty_check</label>
-        <select id="duty"><option>NONE</option><option>ADVISORY</option><option>HARD_DUTY</option></select>
-      </div>
-    </div>
-    <label>Note ≤140 (no why)</label>
-    <input id="note" type="text" maxlength="140" placeholder="optional operator note">
-    <label>pl_id (for seal / break)</label>
-    <input id="pl_id" type="text" placeholder="filled after open">
-    <label>break_reason</label>
-    <select id="reason">
-      <option>speech_occurred</option><option>act_occurred</option>
-      <option>operator_void</option><option>duty_conflict</option>
+  <header>
+    <p class="brand">PeaceLock</p>
+    <h1>Quiet window</h1>
+    <p class="lede">Record a silence or an inaction you chose, as a receipt on this computer.</p>
+  </header>
+  <p id="status" class="status" role="status">No quiet window yet. Choose Open quiet window when you are ready.</p>
+  <section class="card">
+    <label for="mode">What you are keeping</label>
+    <select id="mode">
+      <option value="SILENCE">Silence</option>
+      <option value="INACTION">Inaction</option>
+      <option value="BOTH">Silence and inaction</option>
+    </select>
+    <label for="channel">Where</label>
+    <input id="channel" type="text" value="email" autocomplete="off">
+    <label for="act_class">Kind of act</label>
+    <select id="act_class">
+      <option value="reply">Reply</option>
+      <option value="file">File</option>
+      <option value="post">Post</option>
+      <option value="call">Call</option>
+      <option value="attend">Attend</option>
+      <option value="sign">Sign</option>
+      <option value="pay">Pay</option>
+      <option value="transfer">Transfer</option>
+      <option value="delete">Delete</option>
+      <option value="other">Other</option>
     </select>
     <div class="actions">
-      <button type="button" id="btn-open">Open</button>
-      <button type="button" id="btn-seal">Seal</button>
-      <button type="button" class="ghost" id="btn-break">Break</button>
-      <button type="button" class="ghost" id="btn-show">Show</button>
-      <button type="button" class="ghost" id="btn-verify">Verify</button>
-      <button type="button" class="ghost" id="btn-health">Health</button>
-      <button type="button" class="ghost" id="btn-skill">Skill</button>
+      <button type="button" id="btn-open">Open quiet window</button>
+      <button type="button" class="ghost" id="btn-verify">Check ledger</button>
     </div>
-  </fieldset>
-  <fieldset>
-    <legend>Upload envelope</legend>
-    <p class="lede">Hashes file bytes. Stores timestamp + date stamp. Does not store unspoken words.</p>
+  </section>
+  <details>
+    <summary>Advanced</summary>
+    <p class="hint">Seal, break, list, and file hash. The first screen only opens a window.</p>
+    <label for="duty">Duty check</label>
+    <select id="duty">
+      <option value="NONE">None</option>
+      <option value="ADVISORY">Advisory</option>
+      <option value="HARD_DUTY">HARD_DUTY</option>
+    </select>
+    <label for="note">Note (140 characters or fewer)</label>
+    <input id="note" type="text" maxlength="140" placeholder="Optional">
+    <label for="pl_id">Window id</label>
+    <input id="pl_id" type="text" placeholder="Filled in after you open a window" autocomplete="off">
+    <label for="reason">If the window ended</label>
+    <select id="reason">
+      <option value="speech_occurred">Speech occurred</option>
+      <option value="act_occurred">An act occurred</option>
+      <option value="operator_void">You voided it</option>
+      <option value="duty_conflict">Duty conflict</option>
+    </select>
+    <div class="actions">
+      <button type="button" id="btn-seal">Seal window</button>
+      <button type="button" class="ghost" id="btn-break">Record a break</button>
+      <button type="button" class="ghost" id="btn-show">List receipts</button>
+    </div>
+    <label for="file">File to hash</label>
     <input type="file" id="file">
     <div class="actions">
-      <button type="button" id="btn-upload">Attach envelope</button>
-      <button type="button" class="ghost" id="btn-export">Export JSONL</button>
+      <button type="button" id="btn-upload">Attach file</button>
+      <button type="button" class="ghost" id="btn-export">Export ledger</button>
+      <button type="button" class="ghost" id="btn-health">App status</button>
+      <button type="button" class="ghost" id="btn-skill">Skill note</button>
     </div>
-  </fieldset>
-  <pre id="out">{}</pre>
+    <pre id="out" hidden></pre>
+  </details>
+  <details>
+    <summary>About</summary>
+    <p class="hint">Author: Aziel Eliab. A receipt stores no transcript. Those fields stay ABSENT. HARD_DUTY refuses and writes nothing.</p>
+    <p class="hint">__HONEST__</p>
+  </details>
+  <footer>Aziel Eliab</footer>
 <script>
-async function api(path, body) {
-  var res = await fetch(path, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(body || {})
-  });
-  var data = await res.json();
-  if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
-  return data;
-}
 function fields() {
   return {
     mode: document.getElementById("mode").value,
@@ -162,12 +218,62 @@ function fields() {
     reason: document.getElementById("reason").value
   };
 }
+function humanError(msg) {
+  if (/HARD_DUTY/i.test(msg)) return "A hard duty check refuses this and writes nothing.";
+  if (/no OPEN window|open first/i.test(msg)) return "There is no open window with that id.";
+  if (/no quiet window/i.test(msg)) return "That window id is not in this ledger.";
+  if (/already BROKEN/i.test(msg)) return "This window is already recorded as broken. The sealed receipt stays.";
+  if (/break requires SEALED/i.test(msg)) return "Seal the window before recording a break.";
+  if (/Choose a file/i.test(msg)) return "Choose a file.";
+  return msg;
+}
+function plain(data) {
+  if (data.error) return humanError(String(data.error));
+  if (data.action === "opened") {
+    var id = data.receipt && data.receipt.pl_id;
+    return id ? "Quiet window open. Id " + id + "." : "Quiet window open.";
+  }
+  if (data.action === "sealed") return "Window sealed. The receipt is in the ledger.";
+  if (data.action === "broken") return "Recorded as broken. The earlier seal stays in the ledger.";
+  if (data.action === "show") {
+    var n = data.length || 0;
+    return n === 1 ? "1 receipt in this ledger." : n + " receipts in this ledger.";
+  }
+  if (data.action === "verify") return data.ok ? "Ledger checks out." : "Ledger check failed.";
+  if (data.action === "envelope") return "File hash attached to the ledger.";
+  if (data.action === "health") return "This app is running on this computer.";
+  if (data.action === "skill") return "PeaceLock records a quiet window you chose.";
+  if (data.action === "export") return "Export is ready in the response below.";
+  return "Done.";
+}
+function nextStep(message) {
+  var msg = String(message || "");
+  if (/HARD_DUTY/i.test(msg)) return " Nothing was written. Set duty check to None, then try again.";
+  if (/pl_id|open first|no OPEN|window id/i.test(msg)) return " Open a quiet window first. Its id is filled in for you.";
+  if (/file|choose/i.test(msg)) return " Choose a file, then choose Attach file.";
+  return " Try Open quiet window, or open About.";
+}
 function show(data, kind) {
   var el = document.getElementById("status");
   el.className = "status" + (kind ? " " + kind : "");
-  el.textContent = data.error || data.message || JSON.stringify(data.action || data.ok);
-  document.getElementById("out").textContent = JSON.stringify(data, null, 2);
+  var message = plain(data);
+  if (kind === "bad") message += nextStep(data.error || message);
+  el.textContent = message;
+  el.scrollIntoView({block: "nearest"});
+  var out = document.getElementById("out");
+  out.hidden = false;
+  out.textContent = JSON.stringify(data, null, 2);
   if (data.receipt && data.receipt.pl_id) document.getElementById("pl_id").value = data.receipt.pl_id;
+}
+async function api(path, body) {
+  var res = await fetch(path, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body || {})
+  });
+  var data = await res.json();
+  if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
+  return data;
 }
 async function run(path, extra) {
   try { show(await api(path, Object.assign(fields(), extra || {})), "ok"); }
@@ -183,15 +289,48 @@ document.getElementById("btn-skill").onclick = function () { run("/skill"); };
 document.getElementById("btn-export").onclick = function () { run("/export"); };
 document.getElementById("btn-upload").onclick = async function () {
   var f = document.getElementById("file").files[0];
-  if (!f) { show({error: "choose a file"}, "bad"); return; }
+  if (!f) { show({error: "Choose a file"}, "bad"); return; }
   var buf = await f.arrayBuffer();
-  var hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", buf))].map(b => b.toString(16).padStart(2,"0")).join("");
+  var hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", buf))].map(function (b) {
+    return b.toString(16).padStart(2, "0");
+  }).join("");
   run("/upload", {file_name: f.name, file_sha256: hash});
 };
 </script>
 </body>
 </html>
 """
+
+
+def wants_json(accept: str | None) -> bool:
+    """True when the caller prefers application/json over text/html."""
+    if not accept:
+        return False
+    ranked: list[tuple[float, int, str]] = []
+    for index, raw in enumerate(accept.split(",")):
+        item = raw.strip()
+        if not item:
+            continue
+        quality = 1.0
+        if ";q=" in item:
+            media, _, qv = item.partition(";q=")
+            item = media.strip()
+            try:
+                quality = float(qv.split(";")[0].strip())
+            except ValueError:
+                quality = 0.0
+        else:
+            item = item.split(";")[0].strip()
+        ranked.append((quality, -index, item.lower()))
+    ranked.sort(reverse=True)
+    for _, _, media in ranked:
+        if media in {"application/json", "text/html", "*/*"}:
+            return media == "application/json"
+    return False
+
+
+def render_page() -> str:
+    return PAGE.replace("__HONEST__", HONEST_SCOPE)
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -219,11 +358,25 @@ class _Handler(BaseHTTPRequestHandler):
         return data
 
     def do_GET(self) -> None:  # noqa: N802
-        if urlparse(self.path).path not in ("/", "/index.html"):
-            self.send_error(404)
+        path = urlparse(self.path).path
+        if path not in ("/", "/index.html"):
+            if wants_json(self.headers.get("Accept")):
+                self._json({"ok": False, "error": "not found"}, 404)
+            else:
+                self.send_error(404)
             return
-        page = PAGE.replace("__HONEST__", HONEST_SCOPE)
-        raw = page.encode("utf-8")
+        if wants_json(self.headers.get("Accept")):
+            ledger: Ledger = self.server.ledger  # type: ignore[attr-defined]
+            self._json({
+                "ok": True,
+                "product": "peacelock",
+                "version": __version__,
+                "author": "Aziel Eliab",
+                "loopback": True,
+                "ledger_length": len(ledger),
+            })
+            return
+        raw = render_page().encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(raw)))
@@ -337,8 +490,7 @@ def serve(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
     tmp = Path(tempfile.mkdtemp(prefix="peacelock-ui-"))
     ledger = Ledger((), path=tmp / "peacelock_ledger.jsonl")
     httpd = _Server(host, port, ledger)
-    print(f"PeaceLock UI  http://{host}:{port}  (loopback only)")
-    print("Author: Aziel Eliab. Transcript is always ABSENT.")
+    print(f"Open http://{host}:{port}/")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

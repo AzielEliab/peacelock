@@ -1,42 +1,45 @@
 # PeaceLock
 
-Open-source **chosen silence / chosen inaction receipt** — append-only
-quiet windows hash-chained on a temporal lattice (PL-WP-0.1).
-`transcript`, `counterfactual_act`, and `inferred_motive` are always
-`ABSENT`. HARD_DUTY cannot be bypassed.
+Record a quiet window you chose — silence, inaction, or both — as a receipt on this computer.
 
 **Author:** Aziel Eliab only
-**Date:** September 2026 · v0.1.0
 **License:** [Apache-2.0](LICENSE)
 
-> Chosen silence is a receipt. Chosen inaction is a receipt.
+## Start
 
-See the spec: [docs/whitepaper.md](docs/whitepaper.md) ·
-[docs/PeaceLock_v0_spec.md](docs/PeaceLock_v0_spec.md) ·
-[peacelock_schema.json](peacelock_schema.json).
-How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
+1. `python -m venv .venv && source .venv/bin/activate && pip install -e .`
+2. `peacelock ui`
+3. Open http://127.0.0.1:8768/ and choose **Open quiet window**.
 
-**Forks are welcome and always allowed.**
+With no arguments, `peacelock` prints that same next step. `peacelock --help` lists commands. Add `--json` when a program should read the result.
 
-## Quick start
-
-```bash
-python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
-peacelock ui
-```
-
-## One-click install
+One-click install (counted download), then the same app:
 
 ```bash
 curl -fsSL https://peacelock-download-tracker.vibelock.workers.dev/install.sh | bash
+peacelock ui
 ```
 
-The script curls the **counted** tarball from this project's Worker
-(`/download`, User-Agent `Mozilla/5.0`), extracts, makes a venv, and
-`pip install -e .`. Then run `peacelock ui`.
+The script downloads the tarball from this project's Worker (`/download`, User-Agent `Mozilla/5.0`), extracts it, and installs. Then open http://127.0.0.1:8768/ (this computer only).
 
-Or use the live software homepage (workspace + counted download):
-https://peacelock-download-tracker.vibelock.workers.dev/
+Day-to-day commands:
+
+```bash
+peacelock open --mode SILENCE --channel email --act-class reply
+peacelock seal --pl-id pl_...
+peacelock show
+peacelock verify
+peacelock doctor
+peacelock verify --json
+```
+
+`peacelock doctor` is a local self-check — not a FragGate live op.
+
+See [docs/whitepaper.md](docs/whitepaper.md), [docs/PeaceLock_v0_spec.md](docs/PeaceLock_v0_spec.md), [peacelock_schema.json](peacelock_schema.json), and [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**Forks are welcome and always allowed.**
+
+Homepage (workspace + counted download): https://peacelock-download-tracker.vibelock.workers.dev/
 
 ## Counted download (Cloudflare Worker)
 
@@ -76,15 +79,13 @@ Direct tarball (also counted): [peacelock-0.1.0.tar.gz](https://peacelock-downlo
 
 ## Local UI
 
-`peacelock ui` serves a loopback dashboard at http://127.0.0.1:8768
+`peacelock ui` prints `Open http://127.0.0.1:8768/` and serves the app on this computer only. Self-contained HTML (no CDN). The ledger for that process lives in a temporary directory.
 
-Binds to `127.0.0.1` only. Self-contained HTML (no CDN). Open / seal /
-break / show / verify / health / skill a local ledger in a process tmp
-dir (catalog labels). Upload attaches evidence metadata (file SHA-256 +
-timestamp + date stamp). Transcript is always ABSENT. `peacelock doctor`
-stays CLI-only — not a FragGate live op.
+The first screen has one action: **Open quiet window**. Seal, break, list, file hash, health, and skill sit under **Advanced**. Light and dark follow the system. Transcript fields stay ABSENT. `peacelock doctor` stays a local self-check — not a FragGate live op.
 
-## CLI smoke
+## CLI
+
+People get short sentences. Programs pass `--json` and receive the same documents as before.
 
 ```bash
 export PEACELOCK_LEDGER=./peacelock_ledger.jsonl
@@ -93,12 +94,14 @@ peacelock seal --pl-id pl_...          # use the id printed by open
 peacelock break --pl-id pl_... --reason operator_void
 peacelock show
 peacelock verify
+peacelock verify --json
 peacelock upload ./stamp.bin           # hashes bytes; stores timestamp + date stamp
 peacelock doctor
+peacelock doctor --json
 ```
 
 Default ledger is `./peacelock_ledger.jsonl`. Override with
-`PEACELOCK_LEDGER` or `--ledger`.
+`PEACELOCK_LEDGER` or `--ledger`. A missing command or a bad flag prints the reason and a next step.
 
 HARD_DUTY:
 
@@ -175,7 +178,7 @@ Agents use this Worker `/mcp` (thin doubles of health/skill/open/seal/break/show
 
 Always send `User-Agent: Mozilla/5.0`.
 
-## Honest banner
+## Notes
 
 THIS IS: chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1).
 THIS IS NOT: a gag-order kit, a wiretap, or third-party binding. HARD_DUTY cannot be bypassed. The Worker does not store ledgers. Author Aziel Eliab only.
